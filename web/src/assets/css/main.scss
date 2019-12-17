@@ -1,0 +1,265 @@
+a:hover{
+  color: #409EFF;
+}
+
+.wrap{
+  position: relative;
+}
+.top-right{
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 25%;
+  height: 260px;
+}
+.top-right .right-item{
+  height: 125px;
+}
+.top-right .right-item:first-child{
+  margin-bottom: 10px;
+}
+.right-item>a{
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 5px;
+}
+.right-item>a>img{
+  width: 100%;
+  height: 100%;
+  transition: .5s;
+}
+.top-right .right-item:hover img{
+  transform: scale(1.1);
+}
+.tab{
+  margin-top: 15px;
+  padding: 0 10px;
+  background-color: #fff;
+  border-radius: 5px;
+}
+.tab .el-tabs{
+  padding-bottom: 10px;
+}
+.el-tabs .el-tabs__item:hover,
+.el-tabs .el-tabs__item.is-active{
+  color: #409eff!important;
+}
+.el-tabs .el-tabs__active-bar{
+  background-color: #409eff;
+}
+.tab .tab-left{
+  float: left;
+  width: 35%;
+}
+.tab .tab-left li{
+  position: relative;
+  height: 120px;
+}
+.tab .tab-left li:last-child{
+  margin-top: 10px;
+}
+.tab-left li a{
+  overflow: hidden;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+}
+.tab-left li a img{
+  width: 100%;
+  height: 100%;
+  transition: .5s;
+}
+.tab-left li a:hover img{
+  transform: scale(1.1);
+}
+.tab-left li a span{
+  position: absolute;
+  bottom: 30%;
+  left: 0;
+  right: 0;
+  color: #FFF;
+  text-align: left;
+  font-size: 15px;
+  padding: 0 40px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-height: 22px;
+}
+.tab .tab-right{
+  float: right;
+  width: 63%;
+}
+.tab-right li{
+  margin-bottom: 5px;
+  line-height: 38px;
+}
+.tab-right li:hover{
+  background-color: #f7f7f7;
+}
+.tab-right li i{
+  display: inline-block;
+  width: 24px;
+  background-color: #9a9a9a;
+  color: white;
+  line-height: 24px;
+  text-align: center;
+}
+.tab-right li a{
+  margin-left: 10px;
+  font-weight: 500;
+}
+.tab-right li:hover i{
+  background-color: #000;
+}
+.tab-right li:hover a{
+  color: #000;
+}
+.tab-right li:last-child{
+  margin-bottom: 0;
+}
+
+.showList{
+  display: flex;
+  padding-top: 10px;
+  flex-wrap:wrap;
+  justify-content: space-between;
+  align-content: space-between;
+}
+.showList .listItem{
+  width: 28%;
+  padding: 15px 20px;
+  margin-bottom: 8px;
+  border: 1px solid #eee;
+  transition: .5s;
+}
+.showList .listItem:hover{
+  box-shadow: 0 0 10px 0 #23b7cb;
+}
+.listItem>.imgWarp{
+  overflow: hidden;
+  width: 100%;
+  height: 40%;
+  background-color: aqua;
+}
+.imgWarp>img{
+  width: 100%;
+  height: 100%;
+  transition: .5s;
+}
+.listItem:hover .imgWarp>img{
+  transform: scale(1.2);
+}
+.listItem .itemTitle{
+  padding: 15px 0;
+}
+.listItem .itemDesc{
+  overflow: hidden;
+  height: 27%;
+  margin-bottom: 15px;
+  color: #666;
+  font-size: 14px;
+}
+.listItem .readMe{
+  color: #009966;
+}
+.listItem .readMe:before{
+  content: '+';
+}
+
+.new{
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+.new .newList{
+  background-color: #fff;
+  color: #666;
+}
+.newItem{
+  padding-bottom: 10px;
+}
+.newItem .itemTitle{
+  padding-bottom: 5px;
+  font-size: 20px;
+  font-weight: 400;
+}
+.newItem .itemDetail{
+  position: relative;
+  padding: 15px 0 10px 0;
+}
+.itemDetail .detailImg{
+  overflow: hidden;
+  width: 28%;
+  height: 100px;
+}
+.detailImg img{
+  width: 100%;
+  height: 100%;
+  transition: .5s;
+}
+.itemDetail:hover .detailImg img{
+  transform: scale(1.2);
+}
+.itemDetail .desc{
+  position: absolute;
+  top: 10%;
+  right: 0;
+  width: 69%;
+  font-size: 15px;
+}
+.newItem .itemInfo{
+  position: relative;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #000;
+}
+.newItem .itemInfo:after{
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 0;
+  height: 2px;
+  background-color: #409EFF;
+  transition: width .5s;
+}
+.newItem:hover .itemInfo:after{
+  width: 100%;
+}
+.itemInfo span{
+  margin-right: 10px;
+  font-size: 14px;
+}
+.itemInfo .itemLabel i{
+  color: mediumvioletred;
+  transform: rotate(45deg);
+}
+.itemInfo .itemTime i{
+  color: #009966;
+}
+.itemInfo .itemView i{
+  color: firebrick;
+}
+.itemInfo .readMore{
+  position: absolute;
+  top: -8px;
+  right: 8px;
+  padding: 6px;
+  background-color: #409EFF;
+  color: white;
+  border-radius: 6px;
+}
+
+.wrap>.block{
+  background-color: #fff;
+  padding: 19px 0;
+  text-align: center;
+}
+.block{
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
