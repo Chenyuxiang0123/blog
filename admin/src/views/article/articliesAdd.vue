@@ -1,3 +1,4 @@
+
 <template>
   <div class="article">
     <h1>新建文章</h1>
@@ -44,7 +45,13 @@
         </div>
       </el-form-item>
       <el-form-item label='文章内容'>
-        <vue-editor id="editor" v-model="model.conent" useCustomImageHandler @image-added='handleImageAdded' @image-removed='handleRemove'> </vue-editor>
+        <el-tabs type='border-card' v-model="activeName" @tab-click="handleClick">
+          <el-tab-pane label="写文章" name="first">
+            <vue-editor id="editor" v-model="model.content" useCustomImageHandler @image-added='handleImageAdded' @image-removed='handleRemove'> </vue-editor>
+          </el-tab-pane>
+          <el-tab-pane label="预览文章" name="second" v-html="model.content"></el-tab-pane>
+        </el-tabs>
+        
       </el-form-item>
       <el-form-item>
         <div class="localDocument">
@@ -65,6 +72,7 @@
         model: {},
         category: [],
         tag: [],
+        activeName: 'first'
       }
     },
     created(){
@@ -124,8 +132,12 @@
         const file = e.target.files[0]
         read.readAsText(file,'utf-8')
         read.onload = (e)=>{
+          console.log(e.target.result)
           this.$set(this.model,'conent',e.target.result)
         }
+      },
+      handleClick(tab, event) {
+        console.log(tab, event);
       }
     }
   }
@@ -214,5 +226,8 @@
     border: none;
     outline: none;
     border-radius: 4px;
+  }
+  .el-tabs__content{
+    padding: 0!important;
   }
 </style>
