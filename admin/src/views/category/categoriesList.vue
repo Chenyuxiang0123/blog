@@ -7,7 +7,8 @@
       <el-table-column prop="name" label="分类名称" width="130"></el-table-column>
       <el-table-column prop="parent.name" label="所属分类" width="100"></el-table-column>
       <el-table-column prop="router" label="分类路由" width="100"></el-table-column>
-      <el-table-column prop="childList.length" label="子分类个数"></el-table-column>
+      <el-table-column prop="childList.length" label="子分类个数" width="90"></el-table-column>
+      <el-table-column prop="articlies.length" label="文章数量" width="80"></el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
           <el-button

@@ -129,14 +129,32 @@ router.get('/category/:id',async (ctx)=>{
     ctx.body = data
 })
 router.delete('/category/:id',async (ctx) =>{
-    //查找分类
-    const res = await Category.findById(ctx.params.id).populate('parent')
+    //删除分类
+    const res = await Category.findByIdAndDelete(ctx.params.id).populate(['parent','tag'])
+    //删除该分类下的所有文章
+    deleteArticlies(res)
     //判断该分类是否有上级分类
     if(res.parent){
         //从该上级分类中删除
-        const f = await Category.findByIdAndUpdate({_id:res.parent._id},{$pull:{childList:{_id:res._id}}},{multi: true})
+        await Category.findByIdAndUpdate({_id:res.parent._id},{$pull:{childList:{_id:res._id}}},{multi: true})
     }
-    await Category.findByIdAndDelete(ctx.params.id)
+    //判断该分类是否有子分类
+    if(res.childList){
+        //删除所有的子分类
+        res.childList.map(async(item)=>{
+            const cate = await Category.findByIdAndDelete(item._id).populate(['tag'])
+            deleteArticlies(cate)
+        })
+    }
+    function deleteArticlies(res){
+        res.articlies.map(async(item)=>{
+            await Article.findByIdAndDelete(item._id)
+            //从所有的tag中删除文章
+            item.tag.map(async(result)=>{
+                await Tag.findByIdAndUpdate(result._id,{$pull:{articlies:{_id:item._id}}})
+            })
+        })
+    }
     ctx.body = {
         code: 0,
         message: '删除成功！！！',
@@ -170,7 +188,22 @@ router.put('tag/:id',async(ctx)=>{
     }
 })
 router.delete('/tag/:id',async(ctx)=>{
-    await Tag.findOneAndDelete(ctx.params.id)
+    // 删除tag
+    const res = await Tag.findByIdAndDelete(ctx.params.id)
+    // 删除所有文章中tag
+    res.articlies.map(async(item)=>{
+        //删除tag
+        await Article.findByIdAndUpdate(item._id,{$pull:{tag:{_id:res._id}}})
+        // 重新查找文章
+        const result = await Article.findById(item._id).populate('tag')
+        //判断文章的Tag的个数
+        //0个则删除文章
+        if(!result.tag.length){ 
+            await Article.findByIdAndDelete(item._id)
+            //从分类中删除该文章
+            await Category.findByIdAndUpdate(item.category,{$pull:{articlies:{_id:item._id}}})
+        }
+    })
     ctx.body = {
         code: 0,
         type: 'success',
@@ -180,7 +213,15 @@ router.delete('/tag/:id',async(ctx)=>{
 
 //article
 router.post('/article',async(ctx)=>{
-    await Article.create(ctx.request.body)
+    // 保存文章
+    const article = await Article.create(ctx.request.body)
+    // 把文章添加到category的articlies中
+    await Category.findByIdAndUpdate(article.category,{$push:{articlies:article}})
+    // 把文章添加到tags中
+    article.tag.map(async (item)=>{
+        await Tag.findByIdAndUpdate(item,{$push:{articlies:article}})
+    })
+    
     ctx.body = {
         type: 'success',
         code: 0,
@@ -192,7 +233,22 @@ router.get('/article',async(ctx)=>{
     ctx.body = res
 })
 router.put('/article/:id',async(ctx)=>{
-    const res = await Article.findByIdAndUpdate(ctx.params.id,ctx.request.body)
+    //更新文章
+    const article =  await Article.findByIdAndUpdate(ctx.params.id,ctx.request.body)
+    //重新查找文章
+    const newArticle = await Article.findById(ctx.params.id).populate('tag')
+    //删除原来分类中该篇文章
+    await Category.findByIdAndUpdate(article.category,{$pull:{articlies:{_id:article._id}}})
+    //在新的分类中添加该文章
+    await Category.findByIdAndUpdate(newArticle.category,{$push:{articlies:newArticle}})
+    //删除原来tag中的文章
+    article.tag.map(async(item)=>{
+        await Tag.findByIdAndUpdate(item,{$pull:{articlies:{_id:article._id}}})
+    })
+    //在新的tag中添加文章
+    newArticle.tag.map(async(item)=>{
+        await Tag.findByIdAndUpdate(item,{$push:{articlies:newArticle}})
+    })
     ctx.body = {
         code: 0,
         type: 'success',
@@ -204,7 +260,14 @@ router.get('/article/:id',async(ctx)=>{
     ctx.body = article
 })
 router.delete('/article/:id',async(ctx)=>{
-    await Article.findByIdAndDelete(ctx.params.id)
+    //删除文章
+    const res = await Article.findByIdAndDelete(ctx.params.id)
+    //从分类中删除
+    await Category.findByIdAndUpdate(res.category,{$pull:{articlies:{_id:res._id}}})
+    //从tag中删除
+    res.tag.map(async(item)=>{
+        await Tag.findByIdAndUpdate(item,{$pull:{articlies:{_id:res._id}}})
+    })
     ctx.body = {
         code: 0,
         type: 'success',

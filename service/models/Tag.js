@@ -6,6 +6,10 @@ const schema = new mongoose.Schema({
     type: Date,
     default: new Date()
   },
-  router:String
+  router:String,
+  articlies: {
+    type: Array,
+    default: []
+  }
 })
 module.exports = mongoose.model('Tag',schema)

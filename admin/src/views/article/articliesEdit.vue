@@ -44,7 +44,7 @@
         </div>
       </el-form-item>
       <el-form-item label='文章内容'>
-        <vue-editor id="editor" v-model="model.conent" useCustomImageHandler @image-added='handleImageAdded' @image-removed='handleRemove'> </vue-editor>
+        <vue-editor id="editor" v-model="model.content" useCustomImageHandler @image-added='handleImageAdded' @image-removed='handleRemove'> </vue-editor>
       </el-form-item>
       <el-form-item>
         <div class="localDocument">
@@ -123,6 +123,14 @@
             message: res.data.message
           })
           this.$router.push('/articlies/list')
+        }
+      },
+      readFile(e){
+        const read = new FileReader()
+        const file = e.target.files[0]
+        read.readAsText(file,'utf-8')
+        read.onload = (e)=>{
+          this.$set(this.model,'conent',e.target.result)
         }
       }
     }
