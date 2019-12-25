@@ -184,11 +184,11 @@
     padding: 10px;
     background-color: #fff;
     border-radius: 5px;
+    color: #666;
   }
   .category h1{
     padding-bottom: 10px;
     border-bottom: 1px solid #ccc;
-    color: #666;
     font-size: 17px;
     font-weight: 400;
   }

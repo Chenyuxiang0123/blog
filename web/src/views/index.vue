@@ -3,9 +3,7 @@
     <el-header>
       <my-header />
     </el-header>
-    <el-container>
-      <router-view />
-    </el-container>
+    <router-view />
     <el-footer>
       <my-footer /> 
     </el-footer>

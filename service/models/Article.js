@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const schema = new mongoose.Schema({
   title: String,
   author: String,
-  conent: String,
+  content: String,
   imgUrl: String,
   likes: {
     type: Number,

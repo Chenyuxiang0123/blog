@@ -12,14 +12,7 @@ router.get('/category',async (ctx)=>{
 })
 
 router.get('/category/:id',async (ctx)=>{
-  console.log(ctx.params.id);
-  let articlies = []
   const res = await Category.findById(ctx.params.id).populate(['category','article'])
-  console.log(res)
-  if(res.childLIst){
-    
-  }
   ctx.body = res
-  
 })
 module.exports = router

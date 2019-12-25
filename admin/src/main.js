@@ -2,9 +2,11 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import './plugins/element.js'
 import http from './axios/http'
+import Highlight from './utils/highlight'
+import './plugins/element.js'
 
+Vue.use(Highlight)
 Vue.config.productionTip = false
 
 Vue.prototype.$http = http

@@ -1,7 +1,7 @@
 <template>
   <el-aside width="200px" style="background-color: rgb(48, 65, 86)">
       <el-menu router :default-openeds="['2']">
-        <el-menu-item index="/homePage" active><i class="el-icon-s-home"></i>首页</el-menu-item>
+        <el-menu-item index="/" active><i class="el-icon-s-home"></i>首页</el-menu-item>
         <el-submenu index="2">
           <template slot="title"><i class="el-icon-document" />文章管理</template>
           <el-menu-item index="/articlies/list">文章列表</el-menu-item>
