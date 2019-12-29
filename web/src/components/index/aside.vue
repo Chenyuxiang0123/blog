@@ -79,7 +79,7 @@
       </h2>
       <ul class="list" ref="list">
         <li v-for="item in label" :key="item._id">
-          <a href="#">{{ item.name }}</a>
+          <a href="/tabs">{{ item.name }}</a>
         </li>
       </ul>
     </div>

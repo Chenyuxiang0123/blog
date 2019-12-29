@@ -1,11 +1,10 @@
 <template>
   <div class="list">
-    <h1>评论列表</h1>
+    <h1>留言列表</h1>
     <el-table :data="list" stripe style="width: 100%">
-      <el-table-column prop="time" label="日期" width='160'></el-table-column>
-      <el-table-column prop="_id" label="id" width='215'></el-table-column>
-      <el-table-column prop="name" label="评论人" width='120'></el-table-column>
-      <el-table-column prop="article.title" label="评论文章" width='120'></el-table-column>
+      <el-table-column prop="time" label="日期"></el-table-column>
+      <el-table-column prop="_id" label="id" width='220'></el-table-column>
+      <el-table-column prop="name" label="留言人" width='120'></el-table-column>
       <el-table-column prop="email" label="邮箱" width='170'></el-table-column>
       <el-table-column prop="verify" label="状态"></el-table-column>
       <el-table-column label="操作" width='220'>
@@ -54,14 +53,14 @@ import formatTime from '../utils/FormatTime'
     },
     methods:{
       async fetch(){
-        const res = await this.$http.get('/comment')
+        const res = await this.$http.get('/message')
         res.data.map((item)=>{
           item.time = formatTime(item.time)
         })
         this.list = res.data
       },
       async handleDelete(row){
-        const res = await this.$http.delete(`/comment/${row._id}`)
+        const res = await this.$http.delete(`/message/${row._id}`)
         if(res.data.code === 0){
           this.$message({
             type:res.data.type,
@@ -75,7 +74,7 @@ import formatTime from '../utils/FormatTime'
         this.row = row
       },
       async handleVerify(row){
-        const res = await this.$http.put(`/comment/verify/${row._id}`)
+        const res = await this.$http.put(`/message/verify/${row._id}`)
         if(res.data.code === 0){
           this.$message({
             type: res.data.type,

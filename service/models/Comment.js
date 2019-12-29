@@ -1,10 +1,13 @@
 const mongoose = require('mongoose')
 const schema = new mongoose.Schema({
-  commentator: {
-    type: mongoose.SchemaTypes.ObjectId,
-    ref: 'User'
+  name:  String,
+  avatar: String,
+  content: String,
+  email: String,
+  verify: {
+    type: String,
+    default: '未审核'
   },
-  conent: String,
   time: {
     type: Date,
     default: new Date()

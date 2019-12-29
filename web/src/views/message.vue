@@ -7,6 +7,7 @@
     <div class="messageEdit border-radius-5px padding-left-right-10px">
       <div class="warp border-radius-5px">
         <span>发表留言</span>
+        <p><em>*</em>提交评论之后不会马上显示,还需要通过后台审核</p>
         <i class="el-icon-picture-outline-round">表情</i>
         <el-form :model='message' :rules='rules' ref='message'>
           <el-form-item prop='content'>
@@ -23,7 +24,8 @@
           </el-form-item>
         </el-form>
       </div>
-      <ul class="messageList">
+      <p class="count">共有<span>{{ this.list.length }}</span>条留言</p>
+      <ul class="messageList" v-if="this.list.length">
         <li class="item" v-for="(item,index) in messageList" :key="index">
           <img :src="item.avatar"  alt="">
           <div class="detail">
@@ -36,14 +38,18 @@
           </div>
         </li>
       </ul>
-      <div class="more">
+      <div class="more" v-if='loading'>
         <el-button v-if="show" type="primary" @click="more">加载更多</el-button>
         <el-button v-if="!show" type="primary" :loading="true">加载更多</el-button>
+      </div>
+      <div class="more" v-if="noMore">
+        <span>我是有底线的...</span>
       </div>
     </div>
   </el-main>
 </template>
 <script>
+import formatTime from '../utils/FormatTime'
   export default {
     data() {
       return {
@@ -61,34 +67,59 @@
             {required:true,message:'请输入留言内容',tirgger:'blur'}
           ]
         },
-        messageList:[
-          {
-            avatar:require('../assets/logo.png'),
-            name: '风对对对',
-            content: '分公司你看得见萨芬喝咖啡和覅额武汉以二娃艰苦奋斗时间啊发动机看过很多块几十个很快就符合公司了客户方锐安环境看到回复啡和覅额武汉以二娃艰苦奋斗时间啊发动机看过很多块几十个很快就符合公司了客户方锐安环境看到回复',
-            time:'2019-12-25  14:52:36'
-          }
-        ],
-        show: true
+        list:[],
+        messageList:[],
+        show: true,
+        start:0,
+        skip:10,
+      }
+    },
+    created(){
+      this.fetch()
+    },
+    computed: {
+      noMore(){
+        return this.messageList.length >= this.list.length
+      },
+      loading(){
+        return this.messageList.length < this.list.length
       }
     },
     methods: {
+      async fetch(){
+        const res = await this.$http.get('/message')
+        res.data.map((item)=>{
+          item.time = formatTime(item.time)
+        })
+        this.list = res.data
+        this.count = this.list.length
+        this.messageList = this.list.slice(this.start,this.skip)
+      },
       submit(formName){
-        this.$refs[formName].validate((valid) => {
+        this.$refs[formName].validate(async (valid) => {
           if (valid) {
             //发送请求
+            const res = await this.$http.post('/message',this.message)
+            if(res.data.code === 0){
+              this.$message({
+                type: res.data.type,
+                message: res.data.message
+              })
+              this.message = {}
+            }
           } else {
             return false;
           }
         })
       },
       more(){
+        this.start = this.start + 10
+        this.skip = this.skip + 10
         this.show = false
         setTimeout(()=>{
-          let list = Array(9).fill(this.messageList[0])
-          this.messageList = this.messageList.concat(list)
+          this.messageList = this.messageList.concat(this.list.slice(this.start,this.skip))
           this.show = true
-        },2000)
+        },1000)
       }
     },
   }
@@ -132,6 +163,7 @@
     .messageEdit{
       margin-top: 10px;
       padding-top: 10px;
+      padding-bottom: 10px;
       background-color: #fff;
       color: #666;
       .warp{
@@ -142,7 +174,15 @@
           display: block;
           margin: 10px 0;
           font-size:14px;
-        };
+        }
+        p{
+          margin-top: 4px;
+          font-size: 15px;
+          em{
+            margin-right: 5px;
+            color: red;
+          }
+        }
         .el-form{
           .el-textarea__inner{
             height: 125px;
@@ -180,6 +220,12 @@
           }
         }
       }
+      .count{
+        padding: 10px;
+        margin-top: 10px;
+        background-color: #f0f2f7;
+        text-align: center; 
+      }
       .messageList{
         padding-bottom: 10px;
         li{
@@ -197,21 +243,21 @@
             padding: 10px 10px 10px 40px;
             background-color: #f0f2f7;
             p:first-child{
-              font-size: 16px;
+              font-size: 15px;
               font-weight: 600;
               span:last-child{
                 float: right;
                 letter-spacing: 3px;
-                font-size: 15px;
+                font-size: 14px;
                 font-weight: 400;
               }
             }
             P:nth-child(2){
               padding: 10px 0;
-              font-size: 15px;
+              font-size: 14px;
             }
             p:last-child{
-              font-size: 14px; 
+              font-size: 13px; 
             }
           }
         }
@@ -222,6 +268,9 @@
         button{
           background-color: #409EFF;
           border: none;
+        }
+        span{
+          font-size:14px;
         }
       }
     }
