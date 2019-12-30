@@ -11,11 +11,6 @@ const routes = [
     children:[
       {
         path: '/',
-        name: '首页',
-        redirect: '/homePage'
-      },
-      {
-        path: '/homePage',
         name: 'homePage',
         component:()=>import('../views/homePage')
       },

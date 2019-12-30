@@ -45,13 +45,12 @@
         </div>
       </el-form-item>
       <el-form-item label='文章内容'>
-        <el-tabs type='border-card' v-model="activeName" @tab-click="handleClick">
-          <el-tab-pane label="写文章" name="first">
-            <vue-editor id="editor" v-model="model.content" useCustomImageHandler @image-added='handleImageAdded' @image-removed='handleRemove'> </vue-editor>
-          </el-tab-pane>
-          <el-tab-pane label="预览文章" name="second" v-html="model.content"></el-tab-pane>
-        </el-tabs>
-        
+        <mavon-editor 
+        ref='md'
+        v-model="model.content" 
+        :toolbars='toolbars'
+        @imgAdd="handleImageAdded"
+        @imgDel='handleRemove'/>
       </el-form-item>
       <el-form-item>
         <div class="localDocument">
@@ -65,21 +64,51 @@
 </template>
 
 <script>
-  import { VueEditor } from 'vue2-editor' 
+  import {mavonEditor} from 'mavon-editor'
   export default {
     data(){
       return{
         model: {},
         category: [],
         tag: [],
-        activeName: 'first'
+        toolbars: {
+          bold: true, // 粗体
+          italic: true, // 斜体
+          header: true, // 标题
+          underline: true, // 下划线
+          strikethrough: true, // 中划线
+          mark: true, // 标记
+          superscript: true, // 上角标
+          subscript: true, // 下角标
+          quote: true, // 引用
+          ol: true, // 有序列表
+          ul: true, // 无序列表
+          link: true, // 链接
+          imagelink: true, // 图片链接
+          code: true, // code
+          table: true, // 表格
+          fullscreen: true, // 全屏编辑
+          readmodel: true, // 沉浸式阅读
+          htmlcode: true, // 展示html源码
+          help: false, // 帮助
+          undo: true, // 上一步
+          redo: true, // 下一步
+          trash: true, // 清空
+          save: false, // 保存（触发events中的save事件）
+          navigation: false, // 导航目录
+          alignleft: true, // 左对齐
+          aligncenter: true, // 居中
+          alignright: true, // 右对齐
+          subfield: true, // 单双栏模式
+          preview: true, // 预览
+        }
       }
     },
     created(){
       this.fetch()
     },
     components:{
-      VueEditor
+      mavonEditor
     },
     methods:{
       async fetch(){
@@ -88,15 +117,14 @@
         this.category = category.data
         this.tag = tag.data
       },
-      async handleImageAdded(file, Editor, cursorLocation, resetUploader){
+      async handleImageAdded(pos,file){
         const formData = new FormData()
         formData.append("file", file)
         const res = await this.$http.post('/upload',formData)
-        Editor.insertEmbed(cursorLocation, "image", res.data.url)
-        resetUploader();
+        this.$refs.md.$img2Url(pos,res.data.url)
       },
-      async handleRemove(file) {
-        const list = file.split('/') 
+      async handleRemove(url) {
+        const list = url[0].split('/') 
         const length = list.length
         const name = list[length -1]
         await this.$http.delete(`/upload/${name}`)
@@ -130,25 +158,19 @@
       readFile(e){
         const read = new FileReader()
         const file = e.target.files[0]
+        const name = file.name.split('.')[0]
         read.readAsText(file,'utf-8')
         read.onload = (e)=>{
-          console.log(e.target.result)
-          this.$set(this.model,'conent',e.target.result)
+          this.$set(this.model,'title',name)
+          this.$set(this.model,'content',e.target.result)
         }
-      },
-      handleClick(tab, event) {
-        console.log(tab, event);
       }
     }
   }
 </script>
 
 <style lang="scss" scope>
-  @import "~vue2-editor/dist/vue2-editor.css";
-  @import '~quill/dist/quill.core.css';
-  @import '~quill/dist/quill.bubble.css';
-  @import '~quill/dist/quill.snow.css';
-
+  @import '~mavon-editor/dist/css/index.css';
   h1{
     padding-bottom: 15px;
   }

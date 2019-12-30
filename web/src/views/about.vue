@@ -1,5 +1,7 @@
 <template>
-  <div class="message">
-    about
-  </div>
+  <el-main>
+    <div class="about">
+      about
+    </div>
+  </el-main>
 </template>
