@@ -15,7 +15,22 @@ router.get('/category',async (ctx)=>{
   ctx.body = res
 })
 router.get('/category/:id',async (ctx)=>{
+  const _articleList = []
   const res = await Category.findById(ctx.params.id).populate(['parent','article'])
+  res.articlies = []
+  //找出子分类下的所有文章
+  if(res.childList){
+    res.childList.map(async (item)=>{
+      const res = await Article.find({category:item._id}).populate(['category','tag'])
+      if(res._id){
+        _articleList.push(res)
+      }
+    })
+  }
+  //找出当前分类下的文章
+  const articlies = await Article.find({category:ctx.params.id}).populate(['category','tag'])
+  //合并到category的articlies下
+  res.articlies = res.articlies.concat(_articleList,articlies)
   ctx.body = res
 })
 
@@ -52,7 +67,7 @@ router.get('/message',async(ctx)=>{
   ctx.body = res
 })
 
-//article
+//article detail
 router.get('/article/:id',async(ctx)=>{
   const res = await Article.findById(ctx.params.id).populate(['category','tag'])
   ctx.body = res
@@ -64,6 +79,26 @@ router.post('/comment',async(ctx)=>{
   ctx.body = {
     type: 'success',
     message: '评论提交成功！！！',
+    code: 0
+  }
+})
+router.get('/comment/:id',async(ctx)=>{
+  const res = await Comment.find({article:ctx.params.id,verify:'已审核'})
+  ctx.body = res
+})
+
+//praise
+router.post('/praise/:id',async(ctx)=>{
+  await Article.findByIdAndUpdate(ctx.params.id,{$inc:{likes:1}})
+  ctx.body = {
+    code: 0
+  }
+})
+
+//likes
+router.post('/views/:id',async(ctx)=>{
+  await Article.findByIdAndUpdate(ctx.params.id,{$inc:{views:1}})
+  ctx.body = {
     code: 0
   }
 })

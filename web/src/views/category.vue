@@ -2,11 +2,11 @@
   <div class="category">
     <h1>当前频道: 
       <a href="/">首页</a>
-      <a v-if="this.category.parent" :href="`${this.category.parent.router}/${this.category.parent.name}/${category.parent._id}`">{{ category.parent.name }}</a>
+      <a v-if="category.parent" :href="`${category.parent.router}/${category.parent.name}/${category.parent._id}`">{{ category.parent.name }}</a>
       <span>{{ $route.params.name }}</span>
     </h1>
     <ul class="newList">
-      <li class="newItem" v-for="item in articleList" :key='item._id'>
+      <li class="newItem" v-for="item in articlies" :key='item._id'>
         <div class="itemDetail">
           <div class="detailImg">
             <img :src="item.imgUrl" :alt="item.title">
@@ -41,8 +41,8 @@
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page="currentPage4"
-        :page-sizes="[10, 20, 30, 40]"
+        :current-page="currentPage"
+        :page-sizes="[15, 25, 35, 45]"
         :page-size="100"
         layout="prev, pager, next, jumper,sizes, total"
         :total="pageCount">
@@ -52,19 +52,21 @@
 </template>
 
 <script>
-  import formatTime from '../utils/FormatTime'
+import formatTime from '../utils/FormatTime'
   export default {
+    props: {
+      id: {}
+    },
     data(){
       return{
         category: {},
-        articleList:[],
+        articlies: [],
         activeName: 'second',
-        currentPage1: 5,
-        currentPage2: 5,
-        currentPage3: 5,
-        currentPage4: 4,
-        pageCount:100,
+        currentPage: 1,
+        pageCount: 0,
         count: 0,
+        page: 1,
+        skip: 15
       }
     },
     created() {
@@ -72,28 +74,28 @@
     },
     methods:{
       async fetch(){
-        const res = await this.$http.get(`/category/${this.$route.params.id}`)
-        this.category = res.data
-        let arr = [...this.category.articlies]
-        arr.map(async(item)=>{
+        const res = await this.$http.get(`/category/${this.id}`)
+        res.data.articlies.map((item)=>{
           item.time = formatTime(item.time)
-          let arrTag = [...item.tag]
-          item.tag = []
-          arrTag.map(async(value)=>{
-            const _res = await this.$http.get(`/tabs/${value}`)
-            item.tag.push(_res.data)
-          })
         })
-        this.articleList = arr
+        this.category = res.data
+        this.pageCount = this.category.articlies.length
+        this.paging()
       },
       handleSizeChange(val) {
-        //console.log(`每页 ${val} 条`);
+        this.skip = val 
+        this.page = 1
+        this.paging()
       },
       handleCurrentChange(val) {
-         //console.log(`当前页: ${val}`);
+        this.page = val
+        this.paging()
       },
-      load () {
-        this.count += 2
+      //分页
+      paging(){
+        let page = ( this.page - 1 ) * this.skip
+        let skip = page + this.skip
+        this.articlies = this.category.articlies.slice(page,skip)
       }
     }
   }
