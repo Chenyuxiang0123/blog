@@ -40,8 +40,14 @@ router.post('/category', async (ctx) =>{
 })
 router.put('/category/:id', async (ctx) =>{
     const res = await Category.findById(ctx.params.id).populate('parent')
+    //查找该分类下的所有文章
+    const articlies = await Article.find({category:ctx.params.id})
     // 该分类有parent
     if(res.parent){
+        //原来上级分类articlies -1
+        articlies.map(async()=>{
+            await Category.findByIdAndUpdate(res.parent,{$inc:{articlies:-1}})
+        })
         //请求体中有parent
         if(ctx.request.body.parent){
             // 更新分类
@@ -70,6 +76,10 @@ router.put('/category/:id', async (ctx) =>{
                 }
                 await Category.findByIdAndUpdate(ctx.request.body.parent,{$push:{childList:_res}},{ multi: true })
             }
+            //新的上级分类 articlies +1
+            articlies.map(async()=>{
+                await Category.findByIdAndUpdate(ctx.request.body.parent,{$inc:{articlies:1}})
+            })
         }else{// 请求体中没有parent
             //先删除请求体中的parent
             delete ctx.request.body.parent
@@ -85,6 +95,10 @@ router.put('/category/:id', async (ctx) =>{
         if(ctx.request.body.parent){
             //更新该分类
             await Category.findByIdAndUpdate(ctx.params.id,ctx.request.body)
+            //上级分类articlies +1
+            articlies.map(async()=>{
+                await Category.findByIdAndUpdate(ctx.request.body.parent,{$inc:{articlies:1}})
+            })
             //重新查找该分类
             const cate = await Category.findById(ctx.params.id).populate('parent')
             //保存新上级分类的childList
@@ -94,7 +108,7 @@ router.put('/category/:id', async (ctx) =>{
                 await Category.findByIdAndUpdate(ctx.request.body.parent,{$push:{childList:cate}},{ multi: true })
             }else{
                 let flag
-                list.map(async(item)=>{
+                list.map((item)=>{
                     //childList中有该子分类 则先删除 在添加
                     if(String(item._id) === ctx.params.id){
                         flag = true
@@ -119,7 +133,7 @@ router.put('/category/:id', async (ctx) =>{
     }
 })
 router.get('/category', async (ctx) =>{
-    const list = await Category.find().populate(['parent'])
+    let list = await Category.find().populate('parent')
     ctx.body = list
 })
 router.get('/category/parent',async(ctx)=>{
@@ -132,28 +146,29 @@ router.get('/category/:id',async (ctx)=>{
 })
 router.delete('/category/:id',async (ctx) =>{
     //删除分类
-    const res = await Category.findByIdAndDelete(ctx.params.id).populate(['parent','tag'])
-    //删除该分类下的所有文章
-    deleteArticlies(res)
-    //判断该分类是否有上级分类
-    if(res.parent){
-        //从该上级分类中删除
-        await Category.findByIdAndUpdate({_id:res.parent._id},{$pull:{childList:{_id:res._id}}},{multi: true})
-    }
+    const res = await Category.findByIdAndDelete(ctx.params.id)
+    //找到该分类下的所有文章
+    const articlies = await Article.find({category:res.id})
+    articlies.map(async(item)=>{
+        //删除文章
+        const art = await Article.findByIdAndDelete(item._id)
+        //标签articlies -1
+        art.tag.map(async(item)=>{
+            await Tag.findByIdAndUpdate(item,{$inc:{articlies:-1}})
+        })
+    })
     //判断该分类是否有子分类
     if(res.childList){
-        //删除所有的子分类
         res.childList.map(async(item)=>{
-            const cate = await Category.findByIdAndDelete(item._id).populate(['tag'])
-            deleteArticlies(cate)
-        })
-    }
-    function deleteArticlies(res){
-        res.articlies.map(async(item)=>{
-            await Article.findByIdAndDelete(item._id)
-            //从所有的tag中删除文章
-            item.tag.map(async(result)=>{
-                await Tag.findByIdAndUpdate(result._id,{$pull:{articlies:{_id:item._id}}})
+            //删除和子分类有关的文章
+            await Category.findByIdAndDelete(item._id)
+            const art = await Article.find({category:item})
+            art.map(async(item)=>{
+                const res = await Article.findByIdAndDelete(item._id)
+                //标签articlies -1
+                res.tag.map(async(item)=>{
+                    await Tag.findByIdAndUpdate(item,{$inc:{articlies:-1}})
+                })
             })
         })
     }
@@ -192,8 +207,10 @@ router.put('/tag/:id',async(ctx)=>{
 router.delete('/tag/:id',async(ctx)=>{
     // 删除tag
     const res = await Tag.findByIdAndDelete(ctx.params.id)
+    //查找所有相关的文章
+    const articlies = await Article.find({tag:{_id:res._id}})
     // 删除所有文章中tag
-    res.articlies.map(async(item)=>{
+    articlies.map(async(item)=>{
         //删除tag
         await Article.findByIdAndUpdate(item._id,{$pull:{tag:{_id:res._id}}})
         // 重新查找文章
@@ -201,9 +218,7 @@ router.delete('/tag/:id',async(ctx)=>{
         //判断文章的Tag的个数
         //0个则删除文章
         if(!result.tag.length){ 
-            await Article.findByIdAndDelete(item._id)
-            //从分类中删除该文章
-            await Category.findByIdAndUpdate(item.category,{$pull:{articlies:{_id:item._id}}})
+            await Article.findByIdAndUpdate(item._id,{$set:{tag:[]}})
         }
     })
     ctx.body = {
@@ -218,15 +233,17 @@ router.post('/article',async(ctx)=>{
     const markdown = require('markdown').markdown
     ctx.request.body.html = markdown.toHTML(ctx.request.body.content)
     // 保存文章
-    console.log(ctx.request.body);
-    const article = await Article.create(ctx.request.body)
-    // 把文章添加到category的articlies中
-    await Category.findByIdAndUpdate(article.category,{$push:{articlies:article}})
-    // 把文章添加到tags中
-    article.tag.map(async (item)=>{
-        await Tag.findByIdAndUpdate(item,{$push:{articlies:article}})
+    await Article.create(ctx.request.body)
+    //分类articlies +1
+    const cate = await Category.findByIdAndUpdate(ctx.request.body.category,{$inc:{articlies:1}})
+    //标签articlies +1
+    ctx.request.body.tag.map(async(item)=>{
+        await Tag.findByIdAndUpdate(item,{$inc:{articlies:1}})
     })
-    
+    //判断分类有没有上级分类 有则articlies +1
+    if(cate.parent){
+        await Category.findByIdAndUpdate(cate.parent,{$inc:{articlies:1}})
+    }
     ctx.body = {
         type: 'success',
         code: 0,
@@ -241,20 +258,25 @@ router.put('/article/:id',async(ctx)=>{
     const markdown = require('markdown').markdown
     ctx.request.body.html = markdown.toHTML(ctx.request.body.content)
     //更新文章
-    const article =  await Article.findByIdAndUpdate(ctx.params.id,ctx.request.body)
-    //重新查找文章
-    const newArticle = await Article.findById(ctx.params.id).populate('tag')
-    //删除原来分类中该篇文章
-    await Category.findByIdAndUpdate(article.category,{$pull:{articlies:{_id:article._id}}})
-    //在新的分类中添加该文章
-    await Category.findByIdAndUpdate(newArticle.category,{$push:{articlies:newArticle}})
-    //删除原来tag中的文章
-    article.tag.map(async(item)=>{
-        await Tag.findByIdAndUpdate(item,{$pull:{articlies:{_id:article._id}}})
+    const art = await Article.findByIdAndUpdate(ctx.params.id,ctx.request.body)
+    //原来的分类 -1
+    const category = await Category.findByIdAndUpdate(art.category,{$inc:{articlies:-1}})
+    //判断原来的分类有没有上级分类
+    if(category.parent){
+        await Category.findByIdAndUpdate(category.parent,{$inc:{articlies:-1}})
+    }
+    //新的分类 +1
+    const cate = await Category.findByIdAndUpdate(ctx.request.body.category,{$inc:{articlies:1}})
+    if(cate.parent){
+        await Category.findByIdAndUpdate(cate.parent,{$inc:{articlies:1}})
+    }
+    //原来的标签 -1
+    art.tag.map(async(item)=>{
+        await Tag.findByIdAndUpdate(item,{$inc:{articlies:-1}})
     })
-    //在新的tag中添加文章
-    newArticle.tag.map(async(item)=>{
-        await Tag.findByIdAndUpdate(item,{$push:{articlies:newArticle}})
+    //新的标签 +1
+    ctx.request.body.tag.map(async(item)=>{
+        await Tag.findByIdAndUpdate(item,{$inc:{articlies:1}})
     })
     ctx.body = {
         code: 0,
@@ -269,11 +291,16 @@ router.get('/article/:id',async(ctx)=>{
 router.delete('/article/:id',async(ctx)=>{
     //删除文章
     const res = await Article.findByIdAndDelete(ctx.params.id)
-    //从分类中删除
-    await Category.findByIdAndUpdate(res.category,{$pull:{articlies:{_id:res._id}}})
-    //从tag中删除
+    //分类articlies -1
+    const cate = await Category.findByIdAndUpdate(res.category,{$inc:{articlies:-1}})
+    //判断分类有没有上级分类
+    if(cate.parent){
+        //上级分类articlies -1
+        await Category.findByIdAndUpdate(cate.parent,{$inc:{articlies:-1}})
+    }
+    //标签 -1
     res.tag.map(async(item)=>{
-        await Tag.findByIdAndUpdate(item,{$pull:{articlies:{_id:res._id}}})
+        await Tag.findByIdAndUpdate(item,{$inc:{articlies:-1}})
     })
     ctx.body = {
         code: 0,

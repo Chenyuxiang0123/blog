@@ -22,7 +22,8 @@ const routes = [
           {
             path: '/category/:name/:id',
             name: 'category',
-            component: ()=>import('../views/category')
+            component: ()=>import('../views/category'),
+            props: true
           },
           {
             path: '/detail/article/:title/:id',

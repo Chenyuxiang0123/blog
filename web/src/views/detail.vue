@@ -20,7 +20,7 @@
         </span>
       </div>
       <mavon-editor :ishljs='true' :defaultOpen='"preview"' :toolbarsFlag='false' v-model="article.content"></mavon-editor>
-      <p class="tabs">
+      <p class="tabList">
         <i class="el-icon-price-tag" />标签:
         <router-link v-for="item in article.tag" :key="item._id" to="/tabs">{{ item.name }}</router-link>
       </p>
@@ -64,9 +64,12 @@
           </div>
         </li>
       </ul>
-      <div class="more">
+      <div class="more" v-if='loading'>
         <el-button v-if="show" type="primary" @click="more">加载更多</el-button>
         <el-button v-if="!show" type="primary" :loading="true">加载更多</el-button>
+      </div>
+      <div class="more" v-if="noMore">
+        <span>没有了...</span>
       </div>
     </div>
   </div>
@@ -81,11 +84,11 @@
     },
     data() {
       return {
-        category:{},
-        comment:{},
+        category: {},
+        comment: {},
         flag: true,
-        article:{},
-        rules:{
+        article: {},
+        rules: {
           name:[
             {required:true,message:'请输入昵称',trigger:'blur'},
             {min:3,max:8,message:'长度在3到8个字符',trigger:'blur'}
@@ -98,16 +101,12 @@
             {required:true,message:'请输入留言内容',tirgger:'blur'}
           ]
         },
-        count: 20,
-        commentList:[
-          {
-            avatar:require('../assets/logo.png'),
-            name: '风对对对',
-            content: '分公司你看得见萨芬喝咖啡和覅额武汉以二娃艰苦奋斗时间啊发动机看过很多块几十个很快就符合公司了客户方锐安环境看到回复啡和覅额武汉以二娃艰苦奋斗时间啊发动机看过很多块几十个很快就符合公司了客户方锐安环境看到回复',
-            time:'2019-12-25  14:52:36'
-          }
-        ],
+        count: 0,
+        commentList: [],
+        list: [],
         show: true,
+        start:0,
+        skip:10,
       }
     },
     components:{
@@ -116,24 +115,52 @@
     created() {
       this.fetch()
     },
+    computed: {
+      noMore(){
+        return this.commentList.length >= this.list.length
+      },
+      loading(){
+        return this.commentList.length < this.list.length
+      }
+    },
     methods:{
       async fetch(){
         //获取文章
         const res = await this.$http.get(`/article/${this.id}`)
         res.data.time = formatTime(res.data.time)
+        this.article = res.data
         //获取文章的分类
         const category = await this.$http.get(`/category/${res.data.category._id}`)
         this.category = category.data
-        this.article = res.data
+        //阅读量
+        this.article.views ++
+        await this.$http.post(`/views/${this.article._id}`)
+        //获取文章评论
+        const comments = await this.$http.get(`/comment/${this.article._id}`)
+        comments.data.map((item)=>{
+          item.time = formatTime(item.time)
+        })
+        this.list = comments.data
+        this.count = this.list.length
+        this.commentList = this.list.slice(this.start,this.skip)
       },
       //点赞
-      praise(){
+      async praise(){
         if(this.flag){
           this.article.likes ++
           this.flag = false
+          const res = await this.$http.post(`/praise/${this.id}`)
+          if(res.data.code === 0){
+            this.$message({
+              type: 'success',
+              message: '点赞成功！！！'
+            })
+          }
         }else{
-          this.article.likes --
-          this.flag = true
+          this.$message({
+            type: 'warning',
+            message: '已经点过赞了！！！'
+          })
         }
       },
       //提交评论
@@ -157,12 +184,13 @@
       },
       //加载更多评论
       more(){
+        this.start = this.start + 10
+        this.skip = this.skip + 10
         this.show = false
         setTimeout(()=>{
-          let list = Array(9).fill(this.commentList[0])
-          this.commentList = this.commentList.concat(list)
+          this.commentList = this.commentList.concat(this.list.slice(this.start,this.skip))
           this.show = true
-        },2000)
+        },1000)
       }
     }
   }
@@ -194,6 +222,7 @@
     }
     .v-note-wrapper{
       display: block;
+      z-index: inherit;
       .v-note-panel{
         display: block;
         .v-note-edit{
@@ -221,8 +250,8 @@
         }
       }
     }
-    .tabs{
-      padding: 10px 0;
+    .tabList{
+      padding: 20px 0 10px;
       i{
         margin-right: 2px;
         transform: rotate(45deg);
@@ -366,6 +395,9 @@
       button{
         background-color: #409EFF;
         border: none;
+      }
+      span{
+        font-size: 14px;
       }
     }
   }

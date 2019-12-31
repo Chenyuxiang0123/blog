@@ -12,13 +12,10 @@ const schema = new mongoose.Schema({
     type: Date,
     default: new Date()
   },
-  childList:{
-    type: Array,
-    default: []
-  },
+  childList:Array,
   articlies:{
-    type: Array,
-    default:[]
+    type: Number,
+    default:0
   },
   router: String
 })

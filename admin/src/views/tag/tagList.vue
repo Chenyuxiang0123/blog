@@ -6,7 +6,7 @@
       <el-table-column prop="_id" label="ID" width="250"></el-table-column>
       <el-table-column prop="name" label="标签名称" width="130"></el-table-column>
       <el-table-column prop="router" label="标签路由"></el-table-column>
-      <el-table-column prop="articlies.length" label="文章数量"></el-table-column>
+      <el-table-column prop="articlies" label="文章数量"></el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
           <el-button
