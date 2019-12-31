@@ -6,6 +6,8 @@ const router = new Router({
 const Category = require('../../models/Category')
 const Tag = require('../../models/Tag')
 const Article = require('../../models/Article')
+const Message = require('../../models/Message')
+const Comment = require('../../models/Comment')
 
 //categry
 router.post('/category', async (ctx) =>{
@@ -179,8 +181,8 @@ router.get('/tag/:id',async(ctx)=>{
     let tag = await Tag.findById(ctx.params.id)
     ctx.body = tag
 })
-router.put('tag/:id',async(ctx)=>{
-    await Tag.findByIdAndUpdate({_id:ctx.params.id},ctx.request.body)
+router.put('/tag/:id',async(ctx)=>{
+    await Tag.findByIdAndUpdate(ctx.params.id,ctx.request.body)
     ctx.body = {
         code: 0,
         message: '分类修改成功！！',
@@ -213,7 +215,10 @@ router.delete('/tag/:id',async(ctx)=>{
 
 //article
 router.post('/article',async(ctx)=>{
+    const markdown = require('markdown').markdown
+    ctx.request.body.html = markdown.toHTML(ctx.request.body.content)
     // 保存文章
+    console.log(ctx.request.body);
     const article = await Article.create(ctx.request.body)
     // 把文章添加到category的articlies中
     await Category.findByIdAndUpdate(article.category,{$push:{articlies:article}})
@@ -233,6 +238,8 @@ router.get('/article',async(ctx)=>{
     ctx.body = res
 })
 router.put('/article/:id',async(ctx)=>{
+    const markdown = require('markdown').markdown
+    ctx.request.body.html = markdown.toHTML(ctx.request.body.content)
     //更新文章
     const article =  await Article.findByIdAndUpdate(ctx.params.id,ctx.request.body)
     //重新查找文章
@@ -290,6 +297,83 @@ router.delete('/upload/:id',async(ctx)=>{
     ctx.body = {
         code: 0,
         message: '删除成功！！！'
+    }
+})
+
+//message
+router.get('/message',async(ctx)=>{
+    const res = await Message.find().sort({time:-1})
+    ctx.body = res
+})
+
+router.delete('/message/:id',async(ctx)=>{
+    const res = await Message.findByIdAndDelete(ctx.params.id)
+    if(res){
+        ctx.body = {
+            code: 0,
+            type: 'success',
+            message: '删除成功！！！'
+        }
+    }else{
+        ctx.body = {
+            code: -1,
+            type: 'error',
+            message: '删除失败！！！'
+        }
+    }
+})
+
+router.put('/message/verify/:id',async(ctx)=>{
+    const _res = await Message.findById(ctx.params.id)
+    if(_res.verify === '已审核'){
+        ctx.body = {
+            code: 0,
+            type: 'success',
+            message: '该留言已通过审核！！！'
+        }
+    }else{
+        await Message.findByIdAndUpdate(ctx.params.id,{$set:{verify:'已审核'}})
+        ctx.body = {
+            code: 0,
+            type: 'success',
+            message: '已通过审核！！！'
+        }
+    }
+})
+
+//comment
+router.get('/comment',async(ctx)=>{
+    const res = await Comment.find().populate('article')
+    ctx.body = res
+})
+router.put('/comment/verify/:id',async(ctx)=>{
+    const res = await Comment.findById(ctx.params.id)
+    if(res.verify === '已审核'){
+        ctx.body = {
+            code: 0,
+            type: 'success',
+            message: '该评论已经审核通过了！！！'
+        }
+    }else{
+        await Comment.findByIdAndUpdate(ctx.params.id,{$set:{verify:'已审核'}})
+        await Article.findByIdAndUpdate(res.article,{$inc:{comments: 1}})
+        ctx.body = {
+            code: 0,
+            type: 'success',
+            message: '已通过审核！！！'
+        }
+    }
+})
+router.delete('/comment/:id',async(ctx)=>{
+    const res = await Comment.findById(ctx.params.id)
+    if(res.verify === '已审核'){
+        await Article.findByIdAndUpdate(res.article,{$inc:{comments: -1}})
+    }
+    await Comment.findByIdAndDelete(ctx.params.id)
+    ctx.body = {
+        type: 'success',
+        message: '评论删除成功！！！',
+        code: 0
     }
 })
 module.exports = router

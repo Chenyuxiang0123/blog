@@ -83,6 +83,11 @@ const routes = [
         component:()=>import('../views/comment')
       },
       {
+        path: '/message',
+        name: 'message',
+        component:()=>import('../views/message')
+      },
+      {
         path: '/banner',
         name: 'banner',
         component:()=>import('../views/banner')

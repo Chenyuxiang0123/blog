@@ -20,6 +20,7 @@ const schema = new mongoose.Schema({
     type: Date,
     default: new Date()
   },
+  html:String,
   tag:[{
     type: mongoose.SchemaTypes.ObjectId,
     ref: 'Tag'

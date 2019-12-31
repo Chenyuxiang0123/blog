@@ -2,8 +2,8 @@
   <div class="category">
     <h1>当前频道: 
       <a href="/">首页</a>
-      <a v-if="this.category.parent" :href="`${this.category.parent.router}/${this.category.parent.name}/${category.parent._id}`">{{ category.parent.name }}</a>
-      <span>{{ $route.params.name }}</span>
+      <a href="/tabs">标签云</a>
+      <span>{{ $route.params.title }}</span>
     </h1>
     <ul class="newList">
       <li class="newItem" v-for="item in articleList" :key='item._id'>
@@ -19,7 +19,7 @@
         <div class="itemInfo">
           <span class="itemLabel">
             <i class="el-icon-price-tag"></i>
-            <a href="/tabs" v-for="tag in item.tag" :key="tag._id">{{ tag.name }}</a>
+            <a href="#" v-for="tag in item.tag" :key="tag._id">{{ tag.name }}</a>
           </span>
           <span class="itemTime">
             <i class="el-icon-timer"></i>
@@ -56,7 +56,7 @@
   export default {
     data(){
       return{
-        category: {},
+        tab: {},
         articleList:[],
         activeName: 'second',
         currentPage1: 5,
@@ -72,9 +72,10 @@
     },
     methods:{
       async fetch(){
-        const res = await this.$http.get(`/category/${this.$route.params.id}`)
-        this.category = res.data
-        let arr = [...this.category.articlies]
+        const res = await this.$http.get(`/tabs/${this.$route.params.id}`)
+        
+        this.tab = res.data
+        let arr = [...this.tab.articlies]
         arr.map(async(item)=>{
           item.time = formatTime(item.time)
           let arrTag = [...item.tag]
@@ -114,14 +115,10 @@
   }
   .category h1 a{
     margin-right: 6px;
-    font-size: 16px;
   }
   .category h1 a::after{
     content: '/';
     margin-left: 6px;
-  }
-  .category h1 span{
-    font-size: 16px;
   }
   .desc p{
     color: #666;

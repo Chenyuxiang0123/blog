@@ -25,10 +25,18 @@ const routes = [
             component: ()=>import('../views/category')
           },
           {
-            path: '/article/:title/:id/detial',
+            path: '/detail/article/:title/:id',
             name: 'detial',
-            component: ()=>import('../views/detial'),
-            meta:{ title: '文章详情'}
+            component: ()=>import('../views/detail'),
+            meta: { title: '文章详情'},
+            props: true
+          },
+          {
+            path: '/tabs/detail/:title/:id',
+            name: 'tabDetail',
+            component: ()=>import('../views/tabDetail'),
+            meta: {title: '标签详情'},
+            props: true
           }
         ]
       },
@@ -37,12 +45,6 @@ const routes = [
         name: 'message',
         component: ()=>import('../views/message'),
         meta:{title: '留言板'}
-      },
-      {
-        path: '/about/:name/:id',
-        name: 'about',
-        component: ()=>import('../views/about'),
-        meta:{title: '关于'}
       },
       {
         path: '/tabs',

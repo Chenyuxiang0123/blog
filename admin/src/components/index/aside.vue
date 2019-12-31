@@ -23,6 +23,7 @@
           <el-menu-item index="/user/add">新增用户</el-menu-item>
         </el-submenu>
         <el-menu-item index="/comment"><i class="el-icon-chat-line-square"></i>评论管理</el-menu-item>
+        <el-menu-item index="/message"><i class="el-icon-tickets"></i>留言管理</el-menu-item>
         <el-menu-item index="/banner"><i class="el-icon-picture-outline"></i>轮播图</el-menu-item>
         <el-menu-item index="/setting"><i class="el-icon-setting"></i>设置</el-menu-item>
       </el-menu>
