@@ -38,6 +38,12 @@ const routes = [
             component: ()=>import('../views/tabDetail'),
             meta: {title: '标签详情'},
             props: true
+          },
+          {
+            path: '/articlies/list',
+            name: 'list',
+            component: ()=>import('../views/articleList'),
+            meta: {title:'所有文章'}
           }
         ]
       },

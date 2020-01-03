@@ -212,6 +212,30 @@ a:hover{
   width: 69%;
   font-size: 15px;
 }
+.desc .itemTitle .category{
+  position: relative;
+  display: inline-block;
+  opacity: 0;
+  margin-left: 50px;
+  padding: 5px 10px;
+  font-size: 15px;
+  border-radius: 5px;
+  transition:.5s;
+}
+.category>i{
+  display: inline-block;
+  position: absolute;
+  top: 6px;
+  left: -12px;
+  font-size: 20px;
+}
+.itemTitle:hover .category{
+  opacity: 1;
+  margin-left: 10px;
+}
+.newItem{
+  padding-bottom: 0;
+}
 .newItem .itemInfo{
   position: relative;
   padding-bottom: 10px;
@@ -233,6 +257,12 @@ a:hover{
 .itemInfo span{
   margin-right: 10px;
   font-size: 14px;
+  a{
+    margin-right: 5px;
+  }
+  a:last-child{
+    margin-right: 0;
+  }
 }
 .itemInfo .itemLabel i{
   color: mediumvioletred;
@@ -256,10 +286,14 @@ a:hover{
 
 .wrap>.block{
   background-color: #fff;
-  padding: 19px 0;
+  padding: 9px 0;
   text-align: center;
 }
 .block{
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
+  .el-button--primary{
+    background-color: #409EFF;
+    border-color: #409EFF;
+  }
 }
