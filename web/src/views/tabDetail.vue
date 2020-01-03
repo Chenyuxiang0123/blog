@@ -6,24 +6,29 @@
       <span>{{ $route.params.title }}</span>
     </h1>
     <ul class="newList">
-      <li class="newItem" v-for="item in articleList" :key='item._id'>
+      <li class="newItem" v-for="item in articlies" :key='item._id'>
         <div class="itemDetail">
           <div class="detailImg">
             <img :src="item.imgUrl" :alt="item.title">
           </div>
           <div class="desc">
-            <h3 class="itemTitle"><a href="/article">{{ item.title }}</a></h3>
+            <h3 class="itemTitle">
+              <a :href="`/detail/article/${item.title}/${item._id}`">{{ item.title }}</a>
+              <span class='category' ref='category'>
+                <i class="el-icon-caret-left" ref="icon" />{{ item.category.name }}
+              </span>
+            </h3>
             <p class="ellipsis3">{{ item.content }}</p>
           </div>
         </div>
         <div class="itemInfo">
           <span class="itemLabel">
             <i class="el-icon-price-tag"></i>
-            <a href="#" v-for="tag in item.tag" :key="tag._id">{{ tag.name }}</a>
+            <a :href="tag.router" v-for="tag in item.tag" :key="tag._id">{{ tag.name }}</a>
           </span>
           <span class="itemTime">
             <i class="el-icon-timer"></i>
-            {{ item.time }}
+            {{ item.time | formatDate() }}
           </span>
           <span class="itemView">
             <i class="el-icon-view"></i>
@@ -41,8 +46,8 @@
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page="currentPage4"
-        :page-sizes="[10, 20, 30, 40]"
+        :current-page="currentPage"
+        :page-sizes="[15, 25, 35, 45]"
         :page-size="100"
         layout="prev, pager, next, jumper,sizes, total"
         :total="pageCount">
@@ -52,49 +57,52 @@
 </template>
 
 <script>
-  import formatTime from '../utils/FormatTime'
   export default {
+    inject: ['setRandomColor'],
     data(){
       return{
         tab: {},
-        articleList:[],
-        activeName: 'second',
-        currentPage1: 5,
-        currentPage2: 5,
-        currentPage3: 5,
-        currentPage4: 4,
-        pageCount:100,
+        articleList: [],
+        articlies: [],
+        currentPage: 1,
+        pageCount: 0,
         count: 0,
+        page: 1,
+        skip: 15
       }
     },
     created() {
       this.fetch()
     },
+    watch:{
+      articlies(){
+        setTimeout(()=>{
+          this.setRandomColor()
+        })
+      }
+    },
     methods:{
       async fetch(){
         const res = await this.$http.get(`/tabs/${this.$route.params.id}`)
-        
-        this.tab = res.data
-        let arr = [...this.tab.articlies]
-        arr.map(async(item)=>{
-          item.time = formatTime(item.time)
-          let arrTag = [...item.tag]
-          item.tag = []
-          arrTag.map(async(value)=>{
-            const _res = await this.$http.get(`/tabs/${value}`)
-            item.tag.push(_res.data)
-          })
-        })
-        this.articleList = arr
+        this.tab = res.data.tab
+        this.articleList = res.data.articlies
+        this.pageCount = this.tab.articlies
+        this.paging()
       },
       handleSizeChange(val) {
-        //console.log(`每页 ${val} 条`);
+        this.skip = val 
+        this.page = 1
+        this.paging()
       },
       handleCurrentChange(val) {
-         //console.log(`当前页: ${val}`);
+        this.page = val
+        this.paging()
       },
-      load () {
-        this.count += 2
+      //分页
+      paging(){
+        let page = ( this.page - 1 ) * this.skip
+        let skip = page + this.skip
+        this.articlies = this.articleList.slice(page,skip)
       }
     }
   }
@@ -102,7 +110,7 @@
 
 <style lang="scss" scope>
   .category{
-    padding: 10px;
+    padding: 10px 10px 0;
     background-color: #fff;
     border-radius: 5px;
     color: #666;
@@ -130,6 +138,7 @@
     margin-right: 0;
   }
   .block{
+    padding: 19px 0;
     text-align: center;
   }
 </style>

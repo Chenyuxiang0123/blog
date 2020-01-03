@@ -2,11 +2,11 @@
   <nav class="navbar">
     <h1><a href="/">我的博客</a></h1>
     <ul class="navList">
-      <li v-for="(item,index) in list" :key='index'>
-        <a :href="`${item.router}/${item.name}/${item._id}`">{{ item.name  }}</a>
+      <li v-for="(item) in list" :key='item._id'>
+        <a :href="`${item.router}/${item._id}`">{{ item.name  }}</a>
         <i v-if="item.childList.length" class="el-icon-arrow-down"></i>
         <div class="navHide" v-if="item.childList.length">
-            <a :href="`${value.router}/${value.name}/${value._id}`" v-for="(value,idx) in item.childList"  :key='idx'>{{ value.name }}</a>
+            <a :href="`${value.router}/${value._id}`" v-for="(value,idx) in item.childList"  :key='idx'>{{ value.name }}</a>
         </div>
       </li>
     </ul>
@@ -20,20 +20,12 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
-  data () {
-    return {
-      list:[]
-    }
-  },
-  created() {
-    this.fetch()
-  },
-  methods: {
-    async fetch(){
-      let list = await this.$http.get('/category')
-      this.list = list.data
-    }
+  computed: {
+    ...mapState({
+      list: 'categories'
+    })
   },
 }
 </script>

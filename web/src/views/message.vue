@@ -34,7 +34,7 @@
               <span>{{ index + 1 }}楼</span>
             </p>
             <p>{{ item.content }}</p>
-            <p>{{ item.time }}</p>
+            <p>{{ item.time | formatDate() }}</p>
           </div>
         </li>
       </ul>
@@ -49,7 +49,6 @@
   </el-main>
 </template>
 <script>
-import formatTime from '../utils/FormatTime'
   export default {
     data() {
       return {
@@ -88,9 +87,6 @@ import formatTime from '../utils/FormatTime'
     methods: {
       async fetch(){
         const res = await this.$http.get('/message')
-        res.data.map((item)=>{
-          item.time = formatTime(item.time)
-        })
         this.list = res.data
         this.count = this.list.length
         this.messageList = this.list.slice(this.start,this.skip)

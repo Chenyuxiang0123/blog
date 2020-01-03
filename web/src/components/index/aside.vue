@@ -15,22 +15,23 @@
         <i class="el-icon-s-flag"></i>
         <span>热门排行:</span>
       </h2>
-      <a class="showImg" href="#">
-        <img src="../../assets/h1.jpg" alt="">
-        <span class="ellipsis2">第三以偶片尾的第三以偶片尾的速度大声地我是第速度大声地我是第第三以偶片尾的速度大声地我是第</span>
+      <a class="showImg" :href="`/detail/article/${rankArt.title}/${rankArt._id}`">
+        <img :src="rankArt.imgUrl" :alt="rankArt.title">
+        <span class="ellipsis2">{{ rankArt.content }}</span>
       </a>
       <ul class="rankList">
         <li class="rankItem" v-for="(item,index) in rankList" :key="index">
-          <a :href="item.href" :title="item.title">
+          <a :href="`/detail/article/${item.title}/${item._id}`" :title="item.title">
             <i>{{ index + 1 }}</i>
             <span class="ellipsis1">{{ item.title }}</span>
           </a>
         </li>
       </ul>
     </div>
-    <div class="imgWrap">
-      <a href="#" class="blogImg" title="图片">
-        <img src="../../assets/1.jpg" alt="图片">
+    <div v-if='rankList[7]' class="imgWrap">
+      <a :href="`/detail/article/${rankList[7].title}/${rankList[7]._id}`" class="blogImg" title="图片">
+        <img :src="rankList[7].imgUrl" :alt="rankList[7].title">
+        <span class="ellipsis2">{{rankList[7].content}}</span>
       </a>
     </div>
     <div class="newComments common">
@@ -38,18 +39,18 @@
         <i class="el-icon-s-opportunity"></i>
         <span>最新评论:</span>
       </h2>
-      <a class="showImg" href="#">
-        <img src="../../assets/h1.jpg" alt="">
-        <span class="ellipsis2">第三以偶片尾的第三以偶片尾的速度大声地我是第速度大声地我是第第三以偶片尾的速度大声地我是第</span>
+      <a class="showImg" :href="`/detail/article/${commentArt.title}/${commentArt._id}`">
+        <img :src="commentArt.imgUrl" :alt="commentArt.title">
+        <span class="ellipsis2">{{ commentArt.content }}</span>
       </a>
       <ul class="info">
         <li class="info-item" v-for="item in comments" :key="item._id">
-          <span :style="item.color">{{ item.avatar }}</span>
+          <span style="background-color:red;">{{ item.avatar }}</span>
           <div class="right">
-            <p class="author">{{ item.author }}</p>
+            <p class="author">{{ item.name }}</p>
             <p class="content">{{ item.content }}</p>
             <p class="article">
-              <a href="#">评论于:{{ item.article }}</a>
+              <a href="#">评论于:{{ item.article.title }}</a>
             </p>
           </div>
         </li>
@@ -62,14 +63,9 @@
       </h2>
       <ul class="count-info">
         <li v-for="(item,index) in count" :key="index">
-          {{ item.name }}: <span>{{ item.amount }}</span>
+          {{ item.name }}: <span>{{ item.count | filterName(item.name) }}</span>
         </li>
       </ul>
-    </div>
-    <div class="imgWrap">
-      <a href="#" class="blogImg" title="图片">
-        <img src="../../assets/2.jpg" alt="图片">
-      </a>
     </div>
     <div class="label common">
       <h2 class="comTitle">
@@ -87,177 +83,53 @@
 </template>
 
 <script>
+  import { mapState } from 'vuex'
   export default {
-    data(){
-      return {
-        comments:[
-          {
-            author: 'xiaoming',
-            content: '我是最帅的人我是最帅的人我是最帅的人我是 ',
-            article: '我的博客',
-            time: new Date(),
-            avatar: 'X',
-            color: {backgroundColor: 'gold'}
-          },
-          {
-            author: 'xiaoming',
-            content: '我是最帅的人我是最帅的人我是最帅的人我是 ',
-            article: '我的博客',
-            time: new Date(),
-            avatar: 'X',
-            color: {backgroundColor: 'pink'}
-          },
-          {
-            author: 'xiaoming',
-            content: '我是最帅的人我是最帅的人我是最帅的人我是 ',
-            article: '我的博客',
-            time: new Date(),
-            avatar: 'X',
-            color: {backgroundColor: 'pink'}
-          },
-          {
-            author: 'xiaoming',
-            content: '我是最帅的人我是最帅的人我是最帅的人我是 ',
-            article: '我的博客',
-            time: new Date(),
-            avatar: 'X',
-            color: {backgroundColor: 'pink'}
-          },
-          {
-            author: 'xiaoming',
-            content: '我是最帅的人我是最帅的人我是最帅的人我是 ',
-            article: '我的博客',
-            time: new Date(),
-            avatar: 'X',
-            color: {backgroundColor: 'pink'}
-          },
-          {
-            author: 'xiaoming',
-            content: '我是最帅的人我是最帅的人我是最帅的人我是 ',
-            article: '我的博客',
-            time: new Date(),
-            avatar: 'X',
-            color: {backgroundColor: 'pink'}
-          },
-          {
-            author: 'xiaoming',
-            content: '我是最帅的人我是最帅的人我是最帅的人我是 ',
-            article: '我的博客',
-            time: new Date(),
-            avatar: 'X',
-            color: {backgroundColor: 'pink'}
-          },
-          {
-            author: 'xiaoming',
-            content: '我是最帅的人我是最帅的人我是最帅的人我是 ',
-            article: '我的博客',
-            time: new Date(),
-            avatar: 'X',
-            color: {backgroundColor: 'yellow'}
-          },
-          {
-            author: 'xiaoming',
-            content: '我是最帅的人我是最帅的人我是最帅的人我是 ',
-            article: '我的博客',
-            time: new Date(),
-            avatar: 'X',
-            color: {backgroundColor: 'green'}
-          },
-          {
-            author: 'xiaoming',
-            content: '我是最帅的人我是最帅的人我是最帅的人我是 ',
-            article: '我的博客',
-            time: new Date(),
-            avatar: 'X',
-            color: {backgroundColor: 'red'}
-          }
-        ],
-        count:[
-          {
-            name: '文章',
-            amount: '56篇'
-          },
-          {
-            name: '分类',
-            amount: '20个'
-          },
-          {
-            name: '标签',
-            amount: '100个'
-          },
-          {
-            name: '评论',
-            amount: '1000条'
-          },
-          {
-            name: '访问人数',
-            amount: '1200人'
-          }
-        ],
-        label:[
-          {name: 'CSS'},
-          {name: 'JavaScript'},
-          {name: 'CSS3'},
-          {name: 'HTML'},
-          {name: 'HTML5'},
-          {name: '我的云标签是'},
-          {name: 'Bootstrap'},
-          {name: '我的云标签是'},
-          {name: '我的云标签是'},
-          {name: '我的云标签是'},
-          {name: '我的云标签是'}
-        ],
-        rankList:[
-          {
-            title: "我是一篇文章的标题我是一篇文章的标题",
-            href: '/category'
-          },
-          {
-            title: "撒大声地梵蒂冈地方会很快就哭哭发的都是个人广东省电动蝶阀",
-            href: '/category'
-          },
-          {
-            title: "萨达是发生过任何非合同金额为粉丝大小便女淡粉色",
-            href: '/category'
-          },
-          {
-            title: "色股份大概会根据国家也尔水电费水电费第三方的方式",
-            href: '/category'
-          },
-          {
-            title: "双方都是粉粉粉色方式改革回复退回给饥饿时瑟瑟发抖深V地方",
-            href: '/category'
-          },
-          {
-            title: "是的粉色染色人防对方水电费杉杉股份",
-            href: '/category'
-          },
-          {
-            title: "是的粉色染色人防对方水电费杉杉股份",
-            href: '/category'
-          },
-          {
-            title: "讲话稿也问我第三单发的广泛地公认的好地方还给她",
-            href: '/category'
-          },
-        ]
+    filters:{
+      filterName(value,name){
+        switch(name){
+          case '文章': 
+            return value + '篇'
+          case '分类': 
+            return value + '个'
+          case '标签': 
+            return value + '个'
+          case '评论': 
+            return value + '条'
+          case '访问人数': 
+            return value + '人'
+        } 
       }
     },
-    mounted() {
-      this.setColor()
+    watch:{
+      label(){
+        setTimeout(()=>{
+          this.setColor()
+        })
+      }
+    },
+    computed: {
+      ...mapState({
+        rankArt: 'rankArticle',
+        rankList: 'rankList',
+        commentArt: 'commentArt',
+        comments: 'comments',
+        count: 'count',
+        label: 'tags'
+      })
     },
     methods: {
       randomColor(){
-        let R = parseInt(Math.random() * 255);
-        let G = parseInt(Math.random() * 255);
-        let B = parseInt(Math.random() * 255);
-        return `rgb(${R},${G},${B}`;
-
+        let r = parseInt(Math.random() * 255)
+        let g = parseInt(Math.random() * 255)
+        let b = parseInt(Math.random() * 255)
+        let a = parseFloat(Math.random())
+        return `rgba(${r},${g},${b},${a})`
       },
       setColor(){
-        let list = [...this.$refs.list.children];
-        list.forEach((item)=>{
-          item.style.backgroundColor = this.randomColor();
+          let list = this.$refs.list.children
+          list.forEach(item=>{
+            item.style.backgroundColor = this.randomColor() 
         })
       }
     }

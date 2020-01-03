@@ -76,6 +76,7 @@ aside{
   font-size: 0;
 }
 .blogImg{
+  position: relative;
   display: inline-block;
   overflow: hidden;
   border-radius: 5px;
@@ -86,6 +87,20 @@ aside{
 }
 .imgWrap:hover img{
   transform: scale(1.2);
+}
+.blogImg>span{
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 40px;
+  margin: auto;
+  padding: 0 12%;
+  color: white;
+  font-size: 14px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 .newComments .info .info-item{
@@ -156,9 +171,6 @@ aside{
 .label .comTitle>a{
   float: right;
 }
-.label .list{
-  height: 167px;
-}
 .label .list li{
   display: inline-block;
   padding: 0 5px;
@@ -180,9 +192,9 @@ aside{
 .list li a{
   display: inline-block;
   width: 100%;
-  color: white;
+  color: #000;
   font-size: 12px;
 }
 .list li:hover a{
-  color: #1c2327;
+  color: #23b7cb;
 }

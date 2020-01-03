@@ -6,7 +6,7 @@
         <li class="item" v-for="item in tabs" :key="item._id" :style="item.color">
           <router-link tag="a" :to='item.router'>
             <span>{{ item.name }}</span>
-            <span>(<i>{{ item.articlies.length }}</i>)</span>
+            <span>(<i>{{ item.articlies || 0 }}</i>)</span>
           </router-link>
         </li>
       </ul>
@@ -29,8 +29,9 @@
       async fetch(){
         const res = await this.$http.get('/tabs')
         res.data.map((item)=>{
-          item.color = randomColor()
-          item.router = `${item.router}/${item.name}/${item._id}`
+          let color = randomColor()
+          item.color = `background-color:${color}`
+          item.router = `${item.router}/detail/${item.name}/${item._id}`
         })
         this.tabs = res.data
       }

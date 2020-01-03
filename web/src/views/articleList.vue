@@ -2,8 +2,7 @@
   <div class="category">
     <h1>当前频道: 
       <a href="/">首页</a>
-      <a v-if="category.parent" :href="`${category.parent.router}/${category.parent._id}`">{{ category.parent.name }}</a>
-      <span>{{ $route.params.name }}</span>
+      <span>{{ $route.meta.title}}</span>
     </h1>
     <ul class="newList">
       <li class="newItem" v-for="item in articlies" :key='item._id'>
@@ -58,13 +57,9 @@
 
 <script>
   export default {
-    props: {
-      id: {}
-    },
-    inject:['setRandomColor'],
+    inject: ['setRandomColor'],
     data(){
       return{
-        category: {},
         articleList: [],
         articlies: [],
         currentPage: 1,
@@ -86,10 +81,9 @@
     },
     methods:{
       async fetch(){
-        const res = await this.$http.get(`/category/${this.id}`)
-        this.articleList = res.data.articleList
-        this.category = res.data.category
-        this.pageCount = this.category.articlies
+        const res = await this.$http.get('/article')
+        this.articleList = res.data
+        this.pageCount = this.articleList.length
         this.paging()
       },
       handleSizeChange(val) {

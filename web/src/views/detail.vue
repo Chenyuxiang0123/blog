@@ -4,7 +4,7 @@
       <h1> {{ article.title }}</h1>
       <div class="articleInfo">
         <span class="itemTime">
-          发表时间: {{ article.time }}
+          发表时间: {{ article.time | formatDate() }}
         </span>
         <span class="itemView">
           分类: {{ category.name }}
@@ -27,8 +27,14 @@
       <el-button v-if="flag" @click="praise" type='primary'>赞一下!<span>({{article.likes}})</span></el-button>
       <el-button v-if="!flag" @click="praise" type='danger'>赞一下!<span>({{article.likes}})</span></el-button>
       <ul class="list">
-        <li>上一篇：<router-link :to='`/article/${article.title}/${article._id}/detail`'>{{ article.title }}</router-link></li>
-        <li>下一篇：<router-link :to='`/article/${article.title}/${article._id}/detail`'>{{ article.title }}</router-link></li>
+        <li>上一篇：
+          <a v-if="pre" :href='`/detail/article/${pre.title}/${pre._id}`'>{{ pre.title}}</a>
+          <span v-if="!pre">没有了...</span>
+        </li>
+        <li>下一篇：
+          <a v-if="next" :href='`/detail/article/${next.title}/${next._id}`'>{{ next.title}}</a>
+          <span v-if="!next">没有了...</span>
+        </li>
       </ul>
     </div>
     <div class="messageEdit">
@@ -60,7 +66,7 @@
               <span>{{ item.name }}</span>
             </p>
             <p>{{ item.content }}</p>
-            <p>{{ item.time }}</p>
+            <p>{{ item.time | formatDate() }}</p>
           </div>
         </li>
       </ul>
@@ -76,7 +82,6 @@
 </template>
 
 <script>
-  import formatTime from '../utils/FormatTime'
   import {mavonEditor} from 'mavon-editor'
   export default {
     props:{
@@ -88,6 +93,8 @@
         comment: {},
         flag: true,
         article: {},
+        pre: {},
+        next: {},
         rules: {
           name:[
             {required:true,message:'请输入昵称',trigger:'blur'},
@@ -127,19 +134,17 @@
       async fetch(){
         //获取文章
         const res = await this.$http.get(`/article/${this.id}`)
-        res.data.time = formatTime(res.data.time)
-        this.article = res.data
+        this.article = res.data.res
+        this.pre = res.data.pre
+        this.next = res.data.next
         //获取文章的分类
-        const category = await this.$http.get(`/category/${res.data.category._id}`)
-        this.category = category.data
+        const _cate = await this.$http.get(`/category/${this.article.category._id}`)
+        this.category = _cate.data.category
         //阅读量
         this.article.views ++
         await this.$http.post(`/views/${this.article._id}`)
         //获取文章评论
         const comments = await this.$http.get(`/comment/${this.article._id}`)
-        comments.data.map((item)=>{
-          item.time = formatTime(item.time)
-        })
         this.list = comments.data
         this.count = this.list.length
         this.commentList = this.list.slice(this.start,this.skip)
