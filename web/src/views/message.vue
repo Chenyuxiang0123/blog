@@ -19,6 +19,9 @@
           <el-form-item label='邮箱' prop='email'>
             <el-input v-model="message.email"></el-input>
           </el-form-item>
+          <el-form-item label='头像' prop='avatar'>
+            <img v-for="(item,index) in avatar" :key="index" @click="avatarHandle"  class="avatar" :src="item.url" alt="avatar" ref='avatar'>
+          </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="submit('message')">提交留言</el-button>
           </el-form-item>
@@ -64,6 +67,9 @@
           ],
           content:[
             {required:true,message:'请输入留言内容',tirgger:'blur'}
+          ],
+          avatar:[
+            {required:true,}
           ]
         },
         list:[],
@@ -71,6 +77,16 @@
         show: true,
         start:0,
         skip:10,
+        avatar:[
+          {url:require('../assets/avatar1.webp')},
+          {url:require('../assets/avatar2.jpg')},
+          {url:require('../assets/avatar3.jpg')},
+          {url:require('../assets/avatar4.jpg')},
+          {url:require('../assets/avatar5.jpg')},
+          {url:require('../assets/avatar6.jpg')},
+          {url:require('../assets/avatar7.jpg')},
+          {url:require('../assets/avatar8.jpg')}
+        ]
       }
     },
     created(){
@@ -116,6 +132,19 @@
           this.messageList = this.messageList.concat(this.list.slice(this.start,this.skip))
           this.show = true
         },1000)
+      },
+      avatarHandle(e){
+        this.avatarStyle()
+        e.target.style.borderColor = '#409EFF'
+        e.target.style.opacity = '1'
+        this.$set(this.message,'avatar',e.target.src)
+      },
+      avatarStyle(){
+        let arr = this.$refs.avatar
+        arr.forEach(item=>{
+          item.style.borderColor = 'transparent'
+          item.style.opacity = '.8'
+        })
       }
     },
   }
@@ -204,7 +233,6 @@
           }
           .el-form-item:last-child{
             width: 100%;
-            margin-top: 20px;
             text-align: center;
             .el-button--primary{
               width: 200px;
@@ -212,6 +240,23 @@
               line-height: 20px;
               border-radius: 20px;
               border: none;
+            }
+          }
+          .el-form-item:nth-last-child(2){
+            width: 100%;
+            input{
+              display: none;
+            }
+          }
+          .el-form-item__content{
+            .avatar{
+              width: 60px;
+              height: 60px;
+              margin-right: 5px;
+              opacity: .6;
+              border: 1px solid transparent;
+              border-radius: 50%;
+              transition: .5s;
             }
           }
         }

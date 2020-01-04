@@ -24,8 +24,8 @@
         <i class="el-icon-price-tag" />标签:
         <router-link v-for="item in article.tag" :key="item._id" to="/tabs">{{ item.name }}</router-link>
       </p>
-      <el-button v-if="flag" @click="praise" type='primary'>赞一下!<span>({{article.likes}})</span></el-button>
-      <el-button v-if="!flag" @click="praise" type='danger'>赞一下!<span>({{article.likes}})</span></el-button>
+      <el-button v-if="article.flag" @click="praise" type='primary'>赞一下!<span>({{article.likes}})</span></el-button>
+      <el-button v-if="!article.flag" @click="praise" type='danger'>赞一下!<span>({{article.likes}})</span></el-button>
       <ul class="list">
         <li>上一篇：
           <a v-if="pre" :href='`/detail/article/${pre.title}/${pre._id}`'>{{ pre.title}}</a>
@@ -51,6 +51,9 @@
           </el-form-item>
           <el-form-item label='邮箱' prop='email'>
             <el-input v-model="comment.email"></el-input>
+          </el-form-item>
+          <el-form-item label='头像' prop='avatar'>
+            <img v-for="(item,index) in avatar" :key="index" @click="avatarHandle"  class="avatar" :src="item.url" alt="avatar" ref='avatar'>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="submit('comment')">提交评论</el-button>
@@ -91,7 +94,6 @@
       return {
         category: {},
         comment: {},
-        flag: true,
         article: {},
         pre: {},
         next: {},
@@ -106,6 +108,9 @@
           ],
           content:[
             {required:true,message:'请输入留言内容',tirgger:'blur'}
+          ],
+          avatar:[
+            {required:true,message:'请选择头像'}
           ]
         },
         count: 0,
@@ -114,6 +119,16 @@
         show: true,
         start:0,
         skip:10,
+        avatar:[
+          {url:require('../assets/avatar1.webp')},
+          {url:require('../assets/avatar2.jpg')},
+          {url:require('../assets/avatar3.jpg')},
+          {url:require('../assets/avatar4.jpg')},
+          {url:require('../assets/avatar5.jpg')},
+          {url:require('../assets/avatar6.jpg')},
+          {url:require('../assets/avatar7.jpg')},
+          {url:require('../assets/avatar8.jpg')}
+        ]
       }
     },
     components:{
@@ -141,30 +156,34 @@
         const _cate = await this.$http.get(`/category/${this.article.category._id}`)
         this.category = _cate.data.category
         //阅读量
-        this.article.views ++
-        await this.$http.post(`/views/${this.article._id}`)
+        this.view()
         //获取文章评论
         const comments = await this.$http.get(`/comment/${this.article._id}`)
         this.list = comments.data
         this.count = this.list.length
         this.commentList = this.list.slice(this.start,this.skip)
       },
+      //文章阅读+1
+      async view(){
+        let res = await this.$http.post(`/views/${this.article._id}`)
+        if(res.data.code){
+          this.article.views ++
+        }
+      },
       //点赞
       async praise(){
-        if(this.flag){
+        const res = await this.$http.post(`/praise/${this.id}`)
+        if(res.data.code){
           this.article.likes ++
-          this.flag = false
-          const res = await this.$http.post(`/praise/${this.id}`)
-          if(res.data.code === 0){
-            this.$message({
-              type: 'success',
-              message: '点赞成功！！！'
-            })
-          }
+          this.article.flag = !res.data.code
+          this.$message({
+            type: 'success',
+            message: '点赞成功！！！'
+          })
         }else{
           this.$message({
             type: 'warning',
-            message: '已经点过赞了！！！'
+            message: '已经点过赞了，欢迎明天再来！！！'
           })
         }
       },
@@ -196,6 +215,19 @@
           this.commentList = this.commentList.concat(this.list.slice(this.start,this.skip))
           this.show = true
         },1000)
+      },
+      avatarHandle(e){
+        this.avatarStyle()
+        e.target.style.borderColor = '#409EFF'
+        e.target.style.opacity = '1'
+        this.$set(this.comment,'avatar',e.target.src)
+      },
+      avatarStyle(){
+        let arr = this.$refs.avatar
+        arr.forEach(item=>{
+          item.style.borderColor = 'transparent'
+          item.style.opacity = '.8'
+        })
       }
     }
   }
@@ -346,7 +378,6 @@
         }
         .el-form-item:last-child{
           width: 100%;
-          margin-top: 20px;
           text-align: center;
           .el-button--primary{
             width: 200px;
@@ -356,6 +387,23 @@
             border: none;
           }
         }
+        .el-form-item:nth-last-child(2){
+            width: 100%;
+            input{
+              display: none;
+            }
+          }
+          .el-form-item__content{
+            .avatar{
+              width: 60px;
+              height: 60px;
+              margin-right: 5px;
+              opacity: .6;
+              border: 1px solid transparent;
+              border-radius: 50%;
+              transition: .5s;
+            }
+          }
       }
     }
     .count{

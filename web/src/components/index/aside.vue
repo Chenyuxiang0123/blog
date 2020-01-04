@@ -45,12 +45,12 @@
       </a>
       <ul class="info">
         <li class="info-item" v-for="item in comments" :key="item._id">
-          <span style="background-color:red;">{{ item.avatar }}</span>
           <div class="right">
+            <img :src="item.avatar" :alt="item.name"/>
             <p class="author">{{ item.name }}</p>
-            <p class="content">{{ item.content }}</p>
-            <p class="article">
-              <a href="#">评论于:{{ item.article.title }}</a>
+            <p class="content ellipsis3">{{ item.content }}</p>
+            <p class="articleTitle ellipsis1">
+              <a :title="item.article.title" :href="`/detail/article/${item.article.title}/${item.article._id}`">评论于:{{ item.article.title }}</a>
             </p>
           </div>
         </li>
