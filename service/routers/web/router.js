@@ -8,6 +8,9 @@ const Article = require('../../models/Article')
 const Tag = require('../../models/Tag')
 const Message = require('../../models/Message')
 const Comment = require('../../models/Comment')
+const User = require('../../models/User')
+
+const getIp = require('../../middleware/getIp')
 
 //main
 router.get('/main',async(ctx)=>{
@@ -51,6 +54,12 @@ router.get('/main',async(ctx)=>{
   }
   //tags
   let tags = await Tag.find()
+  //创建用户
+  let IPAdress = getIp()
+  let user = await User.findOne({ip:IPAdress})
+  if(!user){
+    await User.create({ip:IPAdress})
+  }
   ctx.body = {
     categories,
     newArticlies,
@@ -132,6 +141,36 @@ router.get('/article',async(ctx)=>{
   ctx.body = articlies
 })
 router.get('/article/:id',async(ctx)=>{
+  let ip = getIp()
+  let article = await Article.findById(ctx.params.id)
+  let likeUser = await User.findOne({ip,'like.article':article.title})
+  let viewUser = await User.findOne({ip,'view.article':article.title})
+  let time = new Date()
+  let likeFlag
+  let viewFlag
+  if(likeUser){
+    likeUser.like.forEach(item=>{
+      if(item.article === article.title){
+        likeFlag = (time - item.time)/1000/60 >= 24
+      }
+    })
+  }
+  if(viewUser){
+    viewUser.view.forEach(item=>{
+      if(item.article === article.title){
+        viewFlag = (time - item.time)/1000/60 >= 24
+      }
+    })
+  }
+  if(viewFlag){
+    //时间大于等于24小时 再次浏览文章时文章阅读量 +1
+    await User.findByIdAndUpdate(viewUser._id,{$pull:{view:{article:article.title}}})
+  }
+  if(likeFlag){
+    //时间大于等于24小时 点赞功能开启
+    await Article.findByIdAndUpdate(ctx.params.id,{$set:{flag:true}})
+    await User.findByIdAndUpdate(likeUser._id,{$pull:{like:{article:article.title}}})
+  }
   const res = await Article.findById(ctx.params.id).populate(['tag','category'])
   const next = await Article.findOne({_id:{$gt:res._id}})
   const pre = await Article.findOne({_id:{$lt:res._id}}).sort({_id:-1})
@@ -158,17 +197,77 @@ router.get('/comment/:id',async(ctx)=>{
 
 //praise
 router.post('/praise/:id',async(ctx)=>{
-  await Article.findByIdAndUpdate(ctx.params.id,{$inc:{likes:1}})
-  ctx.body = {
-    code: 0
+  let ip = getIp()
+  let time = new Date()
+  let article = await Article.findById(ctx.params.id)
+  let user = await User.findOne({ip})
+  if(!user.like[0]){//user.like中没有数据
+    let data = {
+      article: article.title,
+      time
+    }
+    await User.findByIdAndUpdate(user._id,{$push:{like:data}})
+    await Article.findByIdAndUpdate(ctx.params.id,{$inc:{likes:1}})
+    await Article.findByIdAndUpdate(article._id,{$set:{flag:false}})
+    ctx.body = {
+      code: true
+    }
+  }else{//user.like中有数据
+    console.log('user.like中有数据');
+    
+    let _user = await User.findOne({ip,'like.article':article.title})
+    if(_user){//_user存在
+      ctx.body = {
+        code: false
+      }
+    }else{//_user不存
+      let data = {
+        article: article.title,
+        time
+      }
+      await User.findByIdAndUpdate(user._id,{$push:{like:data}})
+      await Article.findByIdAndUpdate(ctx.params.id,{$inc:{likes:1}})
+      await Article.findByIdAndUpdate(article._id,{$set:{flag:false}})
+      ctx.body = {
+        code: true
+      }
+    }
   }
 })
 
-//likes
+//views
 router.post('/views/:id',async(ctx)=>{
-  await Article.findByIdAndUpdate(ctx.params.id,{$inc:{views:1}})
-  ctx.body = {
-    code: 0
+  let ip = getIp()
+  let time = new Date()
+  let article = await Article.findById(ctx.params.id)
+  let user = await User.findOne({ip})
+  if(!user.view[0]){//user.view中没有数据
+    let data = {
+      article: article.title,
+      time
+    }
+    await User.findByIdAndUpdate(user._id,{$push:{view:data}})
+    await Article.findByIdAndUpdate(article._id,{$inc:{views:1}})
+    ctx.body = {
+      code: true
+    }
+  }else{//user.view中有数据
+    let _user = await User.findOne({ip,'view.article':article.title})
+    if(_user){//_user存在
+      ctx.body = {
+        code: false
+      }
+    }else{//_user不存
+      let data = {
+        article: article.title,
+        time
+      }
+      await User.findByIdAndUpdate(user._id,{$push:{view:data}})
+      await Article.findByIdAndUpdate(article._id,{$inc:{views:1}})
+      ctx.body = {
+        code: true
+      }
+    }
   }
 })
 module.exports = router

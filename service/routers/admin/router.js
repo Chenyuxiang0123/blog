@@ -370,7 +370,7 @@ router.put('/message/verify/:id',async(ctx)=>{
 
 //comment
 router.get('/comment',async(ctx)=>{
-    const res = await Comment.find().populate('article')
+    const res = await Comment.find().populate('article').sort({time:-1})
     ctx.body = res
 })
 router.put('/comment/verify/:id',async(ctx)=>{

@@ -6,5 +6,9 @@ const schema = new mongoose.Schema({
     type: Date,
     default: new Date()
   },
+  avatar:String,
+  ip:String,
+  view:Array,
+  like:Array
 })
 module.exports = mongoose.model('User',schema)

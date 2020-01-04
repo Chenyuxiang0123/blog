@@ -12,6 +12,10 @@ const schema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  flag: {
+    type:Boolean,
+    default: true
+  },
   comments: {
     type: Number,
     default: 0
