@@ -29,7 +29,9 @@
           <ul class="tab-right">
             <li v-for='(list,index) in item.right' :key='list._id'>
               <i>{{ index + 1 }}</i>
-              <a :href="`/detail/article/${list.title}/${list._id}`" class="ellipsis1">{{ list.title }}</a>
+              <a :href="`/detail/article/${list.title}/${list._id}`" :title="list.title">
+                <span class="ellipsis1">{{ list.title }}</span>
+              </a>
             </li>
           </ul>
         </el-tab-pane>
@@ -43,7 +45,7 @@
             <img :src="item.imgUrl" :alt="item.title">
           </div>
           <p class="itemTitle ellipsis1">{{ item.title }}</p>
-          <p class="itemDesc ellipsis4">{{ item.content }}</p>
+          <p class="itemDesc ">{{ item.content }}</p>
           <a class="readMe" :href="`/detail/article/${item.title}/${item._id}`">查看详情</a>
         </li>
       </ul>
@@ -58,7 +60,9 @@
             </div>
             <div class="desc">
               <h3 class="itemTitle">
-                <a :href="`/detail/article/${item.title}/${item._id}`">{{ item.title }}</a>
+                <a :href="`/detail/article/${item.title}/${item._id}`" :title="item.title">
+                  <span class="ellipsis1">{{ item.title }}</span>
+                </a>
                 <span class='category' ref='category'>
                   <i class="el-icon-caret-left" ref="icon" />{{ item.category.name }}
                 </span>

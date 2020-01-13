@@ -40,4 +40,5 @@
   @import '../assets/css/base.scss';
   @import '../assets/css/common.scss';
   @import '../assets/css/main.scss';
+  @import '../assets/css/@media.css';
 </style>

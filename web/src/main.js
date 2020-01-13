@@ -18,16 +18,20 @@ Vue.filter('formatDate',(dateStr,pattern = 'YYYY-MM-DD HH:mm:ss')=>{
 router.beforeEach((to,from,next)=>{
   let title = to.path.split('/')[2]
   if(to.path === '/'){
-    document.title = '我的博客 | 学习笔记 & 生活点滴'
+    document.title = '我的博客 | 学习笔记'
     next()
   }else if(to.path === '/category/首页/5e0a012996a4660468c723c9'){
-    document.title = '我的博客 | 学习笔记 & 生活点滴'
+    document.title = '我的博客 | 学习笔记'
     next('/')
-  }else if(to.path === '/tabs' || to.path === '/articlies/list'){
-    window.document.title = to.meta.title + '-我的博客 | 学习笔记 & 生活点滴'
+  }else if(to.path === '/tabs' || to.path === '/articlies/list' || to.path === '/search/detail'){
+    window.document.title = to.meta.title + '-我的博客 | 学习笔记'
+    next()
+  }else if(title === 'article'){
+    title = to.path.split('/')[3]
+    window.document.title = title + '-文章详情-我的博客 | 学习笔记'
     next()
   }else{
-    window.document.title = title + '-我的博客 | 学习笔记 & 生活点滴'
+    window.document.title = title + '-我的博客 | 学习笔记'
     next()
   }
 })

@@ -41,7 +41,7 @@ router.get('/main',async(ctx)=>{
   const hotComment = await Comment.find({verify:'已审核'}).sort({time:-1}).limit(11).populate('article')
   
   //site
-  let site = [await getInfo('文章',Article),await getInfo('分类',Category),await getInfo('标签',Tag),await getInfo('评论',Comment),{name:'访问人数',count:21}]
+  let site = [await getInfo('文章',Article),await getInfo('分类',Category),await getInfo('标签',Tag),await getInfo('留言',Message),await getInfo('评论',Comment),await getInfo('访问人数',User)]
   async function getInfo(name,model){
     let temp = {}
     let limit = {}
@@ -114,6 +114,8 @@ router.get('/tabs/:id',async(ctx)=>{
 
 //message
 router.post('/message',async(ctx)=>{
+  let ip = getIp()
+  ctx.request.body.ip = ip
   const res = await Message.create(ctx.request.body)
   if(res){
     ctx.body = {
@@ -151,14 +153,14 @@ router.get('/article/:id',async(ctx)=>{
   if(likeUser){
     likeUser.like.forEach(item=>{
       if(item.article === article.title){
-        likeFlag = (time - item.time)/1000/60 >= 24
+        likeFlag = time - item.time >= 24*60*60*1000
       }
     })
   }
   if(viewUser){
     viewUser.view.forEach(item=>{
       if(item.article === article.title){
-        viewFlag = (time - item.time)/1000/60 >= 24
+        viewFlag = time - item.time >= 24*60*60*1000
       }
     })
   }
@@ -183,6 +185,8 @@ router.get('/article/:id',async(ctx)=>{
 
 //comment
 router.post('/comment',async(ctx)=>{
+  let ip = getIp()
+  ctx.request.body.ip = ip
   await Comment.create(ctx.request.body)
   ctx.body = {
     type: 'success',
@@ -213,8 +217,6 @@ router.post('/praise/:id',async(ctx)=>{
       code: true
     }
   }else{//user.like中有数据
-    console.log('user.like中有数据');
-    
     let _user = await User.findOne({ip,'like.article':article.title})
     if(_user){//_user存在
       ctx.body = {
@@ -269,5 +271,63 @@ router.post('/views/:id',async(ctx)=>{
       }
     }
   }
+})
+
+//search
+router.post('/search',async(ctx)=>{
+  let res = {}
+  let value = ctx.request.body.value
+  console.log(ctx.request.body);
+  
+  let reg = value
+  if(value === 'js'){
+    reg = "javascript"
+  }
+  let articlies = await Article.find({title:{$regex:`${reg}`,$options:'i'}}).populate(['tag','category'])
+
+  let cate = await Category.find({name:{$regex:`${reg}`,$options:'i'}})
+  let tag = await Tag.find({name:{$regex:`${reg}`,$options:'i'}})
+  let articleCate = []
+  let articleTag = []
+  if(cate.length){
+    let temp 
+    for(let i = 0; i < cate.length; i++){
+      temp = await Article.find({category:cate[i]._id}).populate(['tag','category'])
+      articleCate = [...articleCate,...temp]
+    }
+  }
+  if(tag.length){
+    for(let i = 0; i < cate.length; i++){
+      let temp 
+      temp = await Article.find({tag:tag[i]._id}).populate(['tag','category'])
+      articleTag = [...articleTag,...temp]
+    }
+  }
+  let arr = [...articlies,...articleCate,...articleTag]
+  function deteleObject(obj) {
+    var uniques = [];
+    var stringify = {};
+    for (var i = 0; i < obj.length; i++) {
+      var keys = Object.keys(obj[i]);
+      keys.sort(function(a, b) {
+        return (Number(a) - Number(b));
+      });
+      var str = '';
+      for (var j = 0; j < keys.length; j++) {
+        str += JSON.stringify(keys[j]);
+        str += JSON.stringify(obj[i][keys[j]]);
+      }
+      if (!stringify.hasOwnProperty(str)) {
+        uniques.push(obj[i]);
+        stringify[str] = true;
+      }
+    }
+    uniques = uniques;
+    return uniques;
+  }
+  let newArr = deteleObject(arr)
+  res.value = value
+  res.articlies = newArr
+  ctx.body = res
 })
 module.exports = router

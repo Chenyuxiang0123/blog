@@ -46,13 +46,13 @@
           <el-form-item prop='content'>
             <el-input type='textarea' v-model="comment.content"></el-input>
           </el-form-item>
-          <el-form-item label='昵称' prop='name'>
+          <el-form-item label='昵称 :' prop='name'>
             <el-input v-model="comment.name"></el-input>
           </el-form-item>
-          <el-form-item label='邮箱' prop='email'>
+          <el-form-item label='邮箱 :' prop='email'>
             <el-input v-model="comment.email"></el-input>
           </el-form-item>
-          <el-form-item label='头像' prop='avatar'>
+          <el-form-item label='头像 :' prop='avatar'>
             <img v-for="(item,index) in avatar" :key="index" @click="avatarHandle"  class="avatar" :src="item.url" alt="avatar" ref='avatar'>
           </el-form-item>
           <el-form-item>
@@ -269,18 +269,18 @@
           width: auto;
           .v-show-content{
             pre{
-              background-color: #000;
-              color: #ccc;
+              background-color: #282c34;
+              color: #abb2bf;
               font-size: 18px;
               code{
                 display: inline-block;
                 width: 100%;
-                background-color: #000;
-                color: #ccc;
+                background-color: #282c34;
+                color: #abb2bf;
               }
               .hljs{
-                background-color: #000;
-                color: #ccc;
+                background-color: #282c34;
+                color: #abb2bf;
               }
             }
           }
@@ -380,20 +380,24 @@
           width: 100%;
           text-align: center;
           .el-button--primary{
-            width: 200px;
+            width: 100px;
             background-color: #409EFF;
             line-height: 20px;
             border-radius: 20px;
             border: none;
+            transition: .5s;
+          }
+          .el-button--primary:hover{
+            width: 200px;
           }
         }
         .el-form-item:nth-last-child(2){
-            width: 100%;
-            input{
-              display: none;
-            }
+          width: 100%;
+          input{
+            display: none;
           }
           .el-form-item__content{
+            width: 100%;
             .avatar{
               width: 60px;
               height: 60px;
@@ -404,6 +408,7 @@
               transition: .5s;
             }
           }
+        }
       }
     }
     .count{
