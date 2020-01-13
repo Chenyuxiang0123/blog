@@ -72,6 +72,7 @@
             {required:true,}
           ]
         },
+        count:0,
         list:[],
         messageList:[],
         show: true,
@@ -235,11 +236,15 @@
             width: 100%;
             text-align: center;
             .el-button--primary{
-              width: 200px;
+              width: 100px;
               background-color: #409EFF;
               line-height: 20px;
               border-radius: 20px;
               border: none;
+              transition: .5s;
+            }
+            .el-button--primary:hover{
+              width: 200px;
             }
           }
           .el-form-item:nth-last-child(2){

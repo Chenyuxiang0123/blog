@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const schema = new mongoose.Schema({
+  ip: String,
   name: String,
   email: String,
   time: {

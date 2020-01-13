@@ -44,6 +44,12 @@ const routes = [
             name: 'list',
             component: ()=>import('../views/articleList'),
             meta: {title:'所有文章'}
+          },
+          {
+            path: '/search/detail',
+            name: 'searchDetail',
+            component: ()=>import('../views/searchDetail'),
+            meta:{title:'搜索详情'}
           }
         ]
       },

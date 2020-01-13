@@ -1,0 +1,58 @@
+@media only screen and (max-width: 936px){
+  .navbar{
+    width: auto!important;
+    transition: .5s;
+  }
+  .el-row{
+    width: 100%!important;
+    padding: 0 10px;
+    transition: .5s;
+  }
+  .el-main .newList .category{
+    display: none!important;
+  }
+  .el-main .new .itemTitle>a span{
+    display: inline-block;
+    width: 100%;
+  }
+  aside{
+    padding-left: 10px!important;
+  }
+}
+@media only screen and (max-width: 816px){
+  .navbar{
+    display: none!important;
+  }
+  .smallNavbar{
+    display: block!important;
+  }
+  .itemInfo .itemTime{
+    display: none!important;
+  }
+}
+@media only screen and (max-width: 684px){
+  .el-row{
+    width: 100%!important;
+  }
+  .el-col-6{
+    display: none!important;
+  }
+  .el-col-18{
+    width: 100%;
+  }
+  .el-main{
+    width: 100%;
+  }
+  .el-main .tabs{
+    width: 97%;
+  }
+  .el-main .top .block{
+    width: 100%;
+  }
+  .el-main .top .top-right{
+    display: none!important;
+  }
+  .el-main .showList .listItem{
+    width: 45%!important;
+  }
+}

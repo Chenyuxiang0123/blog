@@ -252,7 +252,7 @@ router.post('/article',async(ctx)=>{
 })
 router.get('/article',async(ctx)=>{
     let res = await Article.find().populate(['tag','category'])
-    ctx.body = res
+    ctx.body = res.reverse()
 })
 router.put('/article/:id',async(ctx)=>{
     const markdown = require('markdown').markdown

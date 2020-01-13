@@ -96,6 +96,8 @@
             return value + '个'
           case '评论': 
             return value + '条'
+          case '留言': 
+            return value + '条'
           case '访问人数': 
             return value + '人'
         } 

@@ -66,10 +66,10 @@
       background-color: #000;
     }
     .tabList{
-      padding: 10px;
+      padding: 0 10px 10px;
       .item{
         display: inline-block;
-        margin-right: 10px;
+        margin: 10px 10px 0 0;
         padding: 5px;
         border-radius: 5px;
         span:first-child{

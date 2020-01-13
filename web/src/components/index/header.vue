@@ -1,116 +1,104 @@
 <template>
-  <nav class="navbar">
-    <h1><a href="/">我的博客</a></h1>
-    <ul class="navList">
-      <li v-for="(item) in list" :key='item._id'>
-        <a :href="`${item.router}/${item._id}`">{{ item.name  }}</a>
-        <i v-if="item.childList.length" class="el-icon-arrow-down"></i>
-        <div class="navHide" v-if="item.childList.length">
-            <a :href="`${value.router}/${value._id}`" v-for="(value,idx) in item.childList"  :key='idx'>{{ value.name }}</a>
+  <div>
+    <nav class="navbar">
+      <h1><a href="/">我的博客</a></h1>
+      <ul class="navList">
+        <li v-for="(item) in list" :key='item._id'>
+          <a :href="`${item.router}/${item._id}`">{{ item.name  }}</a>
+          <i v-if="item.childList.length" class="el-icon-arrow-down"></i>
+          <div class="navHide" v-if="item.childList.length">
+              <a :href="`${value.router}/${value._id}`" v-for="value in item.childList"  :key='value._id'>{{ value.name }}</a>
+          </div>
+        </li>
+      </ul>
+      <div class="navSearch">
+        <input v-model="value" type="text" placeholder="请输入关键字" autofocus="autofocus">
+        <span @click="search">
+          <i class="el-icon-search"></i>
+        </span>
+      </div>
+    </nav>
+    <nav class="smallNavbar">
+      <el-row>
+        <el-col :span="1">
+          <i @click="drawer=true" class="el-icon-menu"></i>
+          <el-drawer :direction='direction' :visible.sync="drawer" :with-header="false">
+            <ul class="smallNavList">
+              <li v-for="item in list" :key='item._id'>
+                <a :href="`${item.router}/${item._id}`">{{ item.name  }}</a>
+                <i v-if="item.childList.length" class="el-icon-arrow-down"></i>
+                <div class="childList" v-if="item.childList.length">
+                  <a :href="`${value.router}/${value._id}`" v-for="value in item.childList"  :key='value._id'>{{ value.name }}</a>
+                </div>
+              </li>
+            </ul>
+          </el-drawer>
+        </el-col>
+        <el-col :span="22">
+          <h1><a href="/">我的博客</a></h1>
+        </el-col>
+        <el-col :span="1">
+          <i @click="open" class="el-icon-search"></i>
+        </el-col>
+      </el-row>
+      <div class="hideSearch" ref="hideSearch">
+        <div class="search">
+          <input v-model="value" type="text" placeholder="请输入搜索内容">
+          <span @click="search">
+            <i class="el-icon-search"></i>
+          </span>
+          <i @click="close" class="el-icon-close close"></i>
         </div>
-      </li>
-    </ul>
-    <div class="navSearch">
-      <input type="text" placeholder="请输入关键字" autofocus="autofocus">
-      <span>
-        <i class="el-icon-search"></i>
-      </span>
-    </div>
-  </nav>
+      </div>
+    </nav>
+  </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
 export default {
+  data() {
+    return {
+      value: '',
+      drawer: false,
+      direction: 'ltr'
+    }
+  },
   computed: {
     ...mapState({
       list: 'categories'
     })
   },
+  methods: {
+    search(){
+      if(this.value === ''){
+        this.$message({
+          type: 'error',
+          message: '请输入要搜索的内容'
+        })
+        return false
+      }
+      const loading = this.$loading({
+        lock: true,
+        text: 'loading',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0,0,0,0.7)'
+      })
+      setTimeout(()=>{
+        loading.close()
+        this.$router.push({path:'/search/detail',meta:{title:'搜索详情'},query:{value:this.value}})
+      },2000)
+    },
+    close(){
+      this.$refs.hideSearch.style.display = 'none'
+    },
+    open(){
+      this.$refs.hideSearch.style.display = 'block'
+    }
+  },
 }
 </script>
 
-<style scoped>
-  .navbar{
-    display: flex;
-    width: 85%;
-    padding: 10px;
-    margin: 0 auto;
-  }
-  .navbar h1{
-    flex: 1;
-    font-size: 22px;
-    font-weight: 300;
-  }
-  .navbar .navList{
-    flex: 6;
-  }
-  .navbar .navList li{
-    position: relative;
-    display: inline-block;
-    margin-left: 20px;
-    line-height: 31px;
-  }
-  .navList li:hover .navHide{
-     display: block;
-   }
-  .navList li>a:hover{
-    color: #409EFF;
-  }
-  .navList li i{
-    color: #666;
-  }
-  .navHide{
-    display: none;
-    position: absolute;
-    left: 50%;
-    z-index: 999;
-    width: 130px;
-    margin-left: -65px;
-    background-color: rgba( 255,255,255,0.7);
-    border: 1px solid #eee;
-  }
-  .navHide a{
-    display: block;
-    padding: 5px;
-    transition: .5s;
-  }
-  .navHide>a:hover{
-    background-color: #409EFF;
-    color: white;
-    transform: scale(1.1);
-  }
-  .navHide a:last-child{
-    border-bottom: none;
-  }
-  .navbar .navSearch{
-    flex: 2;
-    font-size: 0;
-    text-align: right;
-  }
-  .navSearch input{
-    display: inline-block;
-    max-width: 171px;
-    width: 80%;
-    line-height: 30px;
-    border: 1px solid #EEE;
-    border-bottom-left-radius: 5px;
-    border-top-left-radius: 5px;
-    vertical-align: middle;
-  }
-  input[placeholder]{
-    color: #666;
-    text-indent: 4px;
-  }
-  .navSearch span{
-    display: inline-block;
-    width: 32px;
-    background-color: #ccc;
-    text-align: center;
-    line-height: 32px;
-    vertical-align: middle;
-    font-size: 18px;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-  }
+<style lang='scss' scoped>
+ @import '../../assets/css/header.scss'
 </style>
