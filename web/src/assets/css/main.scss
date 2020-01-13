@@ -13,6 +13,7 @@ a:hover{
   height: 260px;
 }
 .top-right .right-item{
+  position: relative;
   height: 125px;
 }
 .top-right .right-item:first-child{
@@ -29,6 +30,16 @@ a:hover{
   width: 100%;
   height: 100%;
   transition: .5s;
+}
+.right-item>a p{
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 96%;
+  padding: 4px;
+  background-color: rgba(0,0,0,.1);
+  color: #666;
+  cursor: pointer;
 }
 .top-right .right-item:hover img{
   transform: scale(1.1);
@@ -167,7 +178,7 @@ a:hover{
 }
 .listItem .itemDesc{
   overflow: hidden;
-  height: 75px;
+  height: 74px;
   margin-bottom: 7%;
   color: #666;
   font-size: 14px;

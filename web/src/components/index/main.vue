@@ -3,14 +3,10 @@
     <div class="top">
       <carousel />
       <ul class="top-right">
-        <li class="right-item">
-          <a href="#">
-            <img src="../../assets/h1.jpg" alt="h1.jpg">
-          </a>
-        </li>
-        <li class="right-item">
-          <a href="#">
-            <img src="../../assets/h2.jpg" alt="h2.jpg">
+        <li class="right-item" v-for="item in newList.slice(4,6)" :key="item._id">
+          <a :href="`/detail/article/${item.title}/${item._id}`">
+            <img :src="item.imgUrl" :alt="item.title">
+            <p class="ellipsis1">{{ item.title }}</p>
           </a>
         </li>
       </ul>
