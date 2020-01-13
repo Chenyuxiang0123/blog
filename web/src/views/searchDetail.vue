@@ -8,7 +8,7 @@
             <img :src="item.imgUrl" :alt="item.title">
           </div>
           <div class="desc">
-            <h3 class="itemTitle">
+            <h3 class="itemTitle ellipsis1">
               <a :href="`/detail/article/${item.title}/${item._id}`">{{ item.title }}</a>
               <span class='category' ref='category'>
                 <i class="el-icon-caret-left" ref="icon" />{{ item.category.name }}

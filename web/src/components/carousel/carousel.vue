@@ -1,38 +1,24 @@
 <template>
   <div class="block">
     <el-carousel height="260px" width="618px">
-      <el-carousel-item v-for="(item,index) in list" :key="index">
-        <img :src="item.src" class="small" :alt="item.name">
+      <el-carousel-item v-for="item in list" :key="item._id">
+        <a :href="`/detail/article/${item.title}/${item._id}`">
+          <img :src="item.imgUrl" class="small" :alt="item.title">  
+        </a>
       </el-carousel-item>
     </el-carousel>
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex'
   export default {
     name: "carousel",
-    data(){
-      return {
-        list:[
-          {
-            src: require('../../assets/3.jpg'),
-            name: '3.jpg'
-          },
-          {
-            src: require('../../assets/4.jpg'),
-            name: '4.jpg'
-          },
-          {
-            src: require('../../assets/5.jpg'),
-            name: '5.jpg'
-          },
-          {
-            src: require('../../assets/6.jpg'),
-            name: '6.jpg'
-          }
-        ]
-      }
-    }
+    computed: {
+      ...mapState({
+        list: 'newList'
+      })
+    },
   }
 </script>
 
@@ -47,11 +33,9 @@
     width: 100%;
     height: 100%;
   }
-
   .el-carousel__item:nth-child(2n) {
     background-color: #99a9bf;
   }
-
   .el-carousel__item:nth-child(2n+1) {
     background-color: #d3dce6;
   }
