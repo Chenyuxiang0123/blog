@@ -24,8 +24,10 @@
         <i class="el-icon-price-tag" />标签:
         <router-link v-for="item in article.tag" :key="item._id" to="/tabs">{{ item.name }}</router-link>
       </p>
-      <el-button v-if="article.flag" @click="praise" type='primary'>赞一下!<span>({{article.likes}})</span></el-button>
-      <el-button v-if="!article.flag" @click="praise" type='danger'>赞一下!<span>({{article.likes}})</span></el-button>
+      <div class="praiseWrap">
+        <el-button v-if="article.flag" @click="praise" type='primary'>赞一下!<span>({{article.likes}})</span></el-button>
+        <el-button v-if="!article.flag" @click="praise" type='danger'>赞一下!<span>({{article.likes}})</span></el-button>
+      </div>
       <ul class="list">
         <li>上一篇：
           <a v-if="pre" :href='`/detail/article/${pre.title}/${pre._id}`'>{{ pre.title}}</a>
@@ -92,6 +94,7 @@
     },
     data() {
       return {
+        flag: true,
         category: {},
         comment: {},
         article: {},
@@ -117,8 +120,6 @@
         commentList: [],
         list: [],
         show: true,
-        start:0,
-        skip:10,
         avatar:[
           {url:require('../assets/avatar1.webp')},
           {url:require('../assets/avatar2.jpg')},
@@ -159,9 +160,22 @@
         this.view()
         //获取文章评论
         const comments = await this.$http.get(`/comment/${this.article._id}`)
-        this.list = comments.data
+        this.list = comments.data.reverse()
         this.count = this.list.length
         this.commentList = this.list.slice(this.start,this.skip)
+        //获取用户
+        let user = await this.$http.get('/user')
+        this.$set(this.comment,'name',user.data.name)
+        this.$set(this.comment,'email',user.data.email)
+        this.$set(this.comment,'avatar',user.data.avatar)
+        let arr = this.$refs.avatar
+        arr.forEach(item=>{
+          if(item.src === user.data.avatar){
+            this.flag = false
+            item.style.borderColor = '#409EFF'
+            item.style.opacity = '1'
+          }
+        })
       },
       //文章阅读+1
       async view(){
@@ -190,7 +204,14 @@
       //提交评论
       submit(formName){
         this.$refs[formName].validate(async(valid) => {
-          if (valid) {
+          let user = await this.$http.get(`/user/${this.comment.name}`)
+          if(user.data.code === -1){
+            this.$message({
+              type: user.data.type,
+              message: user.data.message,
+            })
+          }
+          if (valid && user.data.code === 0) {
             //发送请求
             this.comment.article = this.id
             const res = await this.$http.post('/comment',this.comment) 
@@ -199,7 +220,7 @@
                 type: res.data.type,
                 message: res.data.message
               })
-              this.comment = {}
+              this.comment.content = ''
             }
           } else {
             return false;
@@ -217,10 +238,12 @@
         },1000)
       },
       avatarHandle(e){
-        this.avatarStyle()
-        e.target.style.borderColor = '#409EFF'
-        e.target.style.opacity = '1'
-        this.$set(this.comment,'avatar',e.target.src)
+        if(this.flag){
+          this.avatarStyle()
+          e.target.style.borderColor = '#409EFF'
+          e.target.style.opacity = '1'
+          this.$set(this.comment,'avatar',e.target.src)
+        }
       },
       avatarStyle(){
         let arr = this.$refs.avatar
@@ -300,16 +323,17 @@
         margin-right: 0;
       }
     }
-    .el-button--primary{
-      background-color: #409eff;
-      border-color: #409eff;
-    }
-    .el-button{
-      display: inline-block;
-      margin-left: 42%;
-      border-radius: 5px;
-      span{
-        margin-left: 4px;
+    .praiseWrap{
+      text-align: center;
+      .el-button--primary{
+        background-color: #409eff;
+        border-color: #409eff;
+      }
+      .el-button{
+        border-radius: 5px;
+        span{
+          margin-left: 4px;
+        }
       }
     }
     .list{

@@ -55,6 +55,7 @@
   export default {
     data() {
       return {
+        flag: true,
         message:{},
         rules:{
           name:[
@@ -104,13 +105,32 @@
     methods: {
       async fetch(){
         const res = await this.$http.get('/message')
+        let user = await this.$http.get('/user')
         this.list = res.data
         this.count = this.list.length
         this.messageList = this.list.slice(this.start,this.skip)
+        this.$set(this.message,'name',user.data.name)
+        this.$set(this.message,'email',user.data.email)
+        this.$set(this.message,'avatar',user.data.avatar)
+        let arr = this.$refs.avatar
+        arr.forEach(item=>{
+          if(item.src === user.data.avatar){
+            this.flag = false
+            item.style.borderColor = '#409EFF'
+            item.style.opacity = '1'
+          }
+        })
       },
       submit(formName){
         this.$refs[formName].validate(async (valid) => {
-          if (valid) {
+          let user = await this.$http.get(`/user/${this.message.name}`)
+          if(user.data.code === -1){
+            this.$message({
+              type: user.data.type,
+              message: user.data.message,
+            })
+          }
+          if (valid && user.data.code === 0) {
             //发送请求
             const res = await this.$http.post('/message',this.message)
             if(res.data.code === 0){
@@ -118,10 +138,8 @@
                 type: res.data.type,
                 message: res.data.message
               })
-              this.message = {}
+              this.message.content = ''
             }
-          } else {
-            return false;
           }
         })
       },
@@ -135,10 +153,12 @@
         },1000)
       },
       avatarHandle(e){
-        this.avatarStyle()
-        e.target.style.borderColor = '#409EFF'
-        e.target.style.opacity = '1'
-        this.$set(this.message,'avatar',e.target.src)
+        if(this.flag){
+          this.avatarStyle()
+          e.target.style.borderColor = '#409EFF'
+          e.target.style.opacity = '1'
+          this.$set(this.message,'avatar',e.target.src)
+        }
       },
       avatarStyle(){
         let arr = this.$refs.avatar

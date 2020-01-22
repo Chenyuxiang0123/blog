@@ -63,16 +63,6 @@ const routes = [
         props: true
       },
       {
-        path: '/user/edit',
-        name: 'userEdit',
-        component:()=>import('../views/user/userEdit')
-      },
-      {
-        path: '/user/add',
-        name: 'userAdd',
-        component:()=>import('../views/user/userAdd')
-      },
-      {
         path: '/user/list',
         name: 'userList',
         component:()=>import('../views/user/userList')
