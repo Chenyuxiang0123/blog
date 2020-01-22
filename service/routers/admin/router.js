@@ -8,6 +8,7 @@ const Tag = require('../../models/Tag')
 const Article = require('../../models/Article')
 const Message = require('../../models/Message')
 const Comment = require('../../models/Comment')
+const User = require('../../models/User')
 
 //categry
 router.post('/category', async (ctx) =>{
@@ -400,6 +401,20 @@ router.delete('/comment/:id',async(ctx)=>{
     ctx.body = {
         type: 'success',
         message: '评论删除成功！！！',
+        code: 0
+    }
+})
+
+//user
+router.get('/user',async(ctx)=>{
+    let list = await User.find()
+    ctx.body = list
+})
+router.delete('/user/:id',async(ctx)=>{
+    let res = await User.findByIdAndDelete({_id:ctx.params.id})
+    ctx.body = {
+        type: 'success',
+        message: '删除成功！！',
         code: 0
     }
 })

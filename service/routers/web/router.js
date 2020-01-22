@@ -14,15 +14,21 @@ const getIp = require('../../middleware/getIp')
 
 //main
 router.get('/main',async(ctx)=>{
+  let ip = getIp()
+  let res = await User.findOne({ip})
   //获取没有parent的分类
   const categories = await Category.find({parent:{$exists:false}})
   //获取所有文章
   const articlies = await Article.find().sort({time:-1}).populate(['tag','category'])
   //最新文章
   const newArticlies = articlies.slice(0,6)
-  //实在想不出什么好的办法了 先只能用本这种笨办法了 
   //获取几个分类以及相关文章 tabs
-  let tabs = [await getTabs('前端工具'),await getTabs('Less & Sass'),await getTabs('Vue'),await getTabs('JavaScript'),await getTabs('HTML5 & CSS3')]
+  let cateList = ['前端工具', 'Less & Sass','Vue','JavaScript','HTML5 & CSS3']
+  let tabs = []
+  for(let i = 0; i < cateList.length; i++){
+    let list = await getTabs(cateList[i])
+    tabs.push(list)
+  }
   async function getTabs(name){
     let tools = {}
     const category = await Category.findOne({name})
@@ -41,15 +47,36 @@ router.get('/main',async(ctx)=>{
   const hotComment = await Comment.find({verify:'已审核'}).sort({time:-1}).limit(11).populate('article')
   
   //site
-  let site = [await getInfo('文章',Article),await getInfo('分类',Category),await getInfo('标签',Tag),await getInfo('留言',Message),await getInfo('评论',Comment),await getInfo('访问人数',User)]
-  async function getInfo(name,model){
+  let siteList = ['文章','分类','标签','留言','评论','访问人数']
+  let site = []
+  for(let i = 0; i < siteList.length; i++){
+    let list = await getInfo(siteList[i])
+    site.push(list)
+  }
+  async function getInfo(name){
     let temp = {}
     let limit = {}
-    if(name === '评论'){
-      limit = {verify:'已审核'}
-    }
     temp.name = name
-    temp.count = await model.find(limit).countDocuments()
+    switch(name){
+      case '文章':
+        temp.count = await Article.find(limit).countDocuments()
+        break;
+      case '分类':
+        temp.count = await Category.find(limit).countDocuments()
+        break;
+      case '标签':
+        temp.count = await Tag.find(limit).countDocuments()
+        break;
+      case '留言':
+        temp.count = await Message.find(limit).countDocuments()
+        break;
+      case '评论':
+        temp.count = await Comment.find({verify:'已审核'}).countDocuments()
+        break;
+      case '访问人数':
+        temp.count = await User.find(limit).countDocuments()
+        break;
+    }
     return temp
   }
   //tags
@@ -72,7 +99,7 @@ router.get('/main',async(ctx)=>{
   }
 })
 
-//category
+//categoryd
 router.get('/category',async (ctx)=>{
   let res = await Category.find({parent:{$exists:false}})
   ctx.body = res
@@ -115,6 +142,17 @@ router.get('/tabs/:id',async(ctx)=>{
 //message
 router.post('/message',async(ctx)=>{
   let ip = getIp()
+  let _user = await User.find({ip})
+  
+  if(!_user.name){
+    let user = {
+      name: ctx.request.body.name,
+      email: ctx.request.body.email,
+      avatar: ctx.request.body.avatar
+    }
+    //更新用户信息
+    let res = await User.findByIdAndUpdate(_user,user)
+  }
   ctx.request.body.ip = ip
   const res = await Message.create(ctx.request.body)
   if(res){
@@ -156,6 +194,8 @@ router.get('/article/:id',async(ctx)=>{
         likeFlag = time - item.time >= 24*60*60*1000
       }
     })
+  }else{
+    likeFlag = true
   }
   if(viewUser){
     viewUser.view.forEach(item=>{
@@ -171,7 +211,9 @@ router.get('/article/:id',async(ctx)=>{
   if(likeFlag){
     //时间大于等于24小时 点赞功能开启
     await Article.findByIdAndUpdate(ctx.params.id,{$set:{flag:true}})
-    await User.findByIdAndUpdate(likeUser._id,{$pull:{like:{article:article.title}}})
+    if(likeUser){
+      await User.findByIdAndUpdate(likeUser._id,{$pull:{like:{article:article.title}}})
+    }
   }
   const res = await Article.findById(ctx.params.id).populate(['tag','category'])
   const next = await Article.findOne({_id:{$gt:res._id}})
@@ -187,6 +229,17 @@ router.get('/article/:id',async(ctx)=>{
 router.post('/comment',async(ctx)=>{
   let ip = getIp()
   ctx.request.body.ip = ip
+  let _user = await User.find({ip})
+  if(!_user.name){
+    let user = {
+      name: ctx.request.body.name,
+      email: ctx.request.body.email,
+      avatar: ctx.request.body.avatar,
+      time: new Date()
+    }
+    //更新用户信息
+    await User.findByIdAndUpdate(_user,user)
+  }
   await Comment.create(ctx.request.body)
   ctx.body = {
     type: 'success',
@@ -329,5 +382,27 @@ router.post('/search',async(ctx)=>{
   res.value = value
   res.articlies = newArr
   ctx.body = res
+})
+
+//user
+router.get('/user/:name',async (ctx)=>{
+  let ip = getIp()
+  let user = await User.findOne({name:ctx.params.name})
+  if(user && ip !== user.ip){
+    ctx.body = {
+      code: -1,
+      type: 'error',
+      message: '该昵称已被使用！！！'
+    }
+  }else{
+    ctx.body = {
+      code: 0
+    }
+  }
+})
+router.get('/user',async (ctx)=>{
+  let ip = getIp()
+  let user = await User.findOne({ip})
+  ctx.body = user
 })
 module.exports = router

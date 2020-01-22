@@ -4,6 +4,9 @@ const schema = new mongoose.Schema({
     type: Date,
     default: new Date()
   },
+  name: String,
+  email: String,
+  avatar: String,
   ip:String,
   view:Array,
   like:Array

@@ -57,11 +57,11 @@
   }
 }
 @media only screen and (max-width: 455px){
+  .smallNavbar .el-row{
+    padding-right: 20px;
+  } 
   .el-main .newItem .itemInfo .itemLike{
     display: none!important;
-  }
-  .el-main .article .el-button{
-    margin-left: 36%!important;
   }
   .el-main .block .el-pagination__sizes{
     display: none;
@@ -69,6 +69,10 @@
   .el-main .listItem .readMe{
     display: inline-block;
     padding-bottom: 15%;
+  }
+  .messageEdit .warp .el-form .el-form-item:not(:first-child){
+    display: block!important;
+    width: auto!important;
   }
 }
 @media only screen and (max-width: 340px){

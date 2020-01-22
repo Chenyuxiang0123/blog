@@ -19,8 +19,7 @@
         </el-submenu>
         <el-submenu index="5">
           <template slot="title"><i class="el-icon-user-solid" />用户管理</template>
-          <el-menu-item index="/user/list">用户列表</el-menu-item>
-          <el-menu-item index="/user/add">新增用户</el-menu-item>
+          <el-menu-item index="/user/list">访客列表</el-menu-item>
         </el-submenu>
         <el-menu-item index="/comment"><i class="el-icon-chat-line-square"></i>评论管理</el-menu-item>
         <el-menu-item index="/message"><i class="el-icon-tickets"></i>留言管理</el-menu-item>
