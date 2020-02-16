@@ -1,7 +1,8 @@
-import axios from 'axios'
+import axios from "axios";
 
 const http = axios.create({
-  baseURL: 'http://localhost:3000/admin/api'
-})
+  //baseURL: 'https://www.server.cyxwblog.com/api/admin'
+  baseURL: "http://localhost:3000/api/admin"
+});
 
-export default http
+export default http;

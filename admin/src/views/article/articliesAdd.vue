@@ -71,6 +71,7 @@
         model: {},
         category: [],
         tag: [],
+        images:[],
         toolbars: {
           bold: true, // 粗体
           italic: true, // 斜体
