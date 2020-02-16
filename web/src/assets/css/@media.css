@@ -82,9 +82,6 @@
   .el-main .article .v-note-wrapper{
     min-width: 100%;
   }
-  .el-main .article .el-button{
-    margin-left: 31%!important;
-  }
   .el-main .block .el-pagination__jump{
     display: none;
   }

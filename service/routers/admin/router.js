@@ -1,6 +1,6 @@
 const Router = require('koa-router')
 const router = new Router({
-    prefix: '/admin/api'
+    prefix: '/api/admin'
 })
 
 const Category = require('../../models/Category')
@@ -12,6 +12,7 @@ const User = require('../../models/User')
 
 //categry
 router.post('/category', async (ctx) =>{
+    ctx.request.body.time = new Date()
     if(!ctx.request.body.name){
         ctx.body = {
             code: -1,
@@ -73,7 +74,7 @@ router.put('/category/:id', async (ctx) =>{
                     }
                 })
                 if(flag){
-                    await Category.findByIdAndUpdate(ctx.request.body.parent,{$pull:{childList:{_id:item._id}}},{ multi: true })
+                    await Category.findByIdAndUpdate(ctx.request.body.parent,{$pull:{childList:{_id:res.parent._id}}},{ multi: true })
                 }
                 await Category.findByIdAndUpdate(ctx.request.body.parent,{$push:{childList:_res}},{ multi: true })
             }
@@ -134,7 +135,7 @@ router.put('/category/:id', async (ctx) =>{
     }
 })
 router.get('/category', async (ctx) =>{
-    let list = await Category.find().populate('parent')
+    let list = await Category.find().sort({time:-1}).populate('parent')
     ctx.body = list
 })
 router.get('/category/parent',async(ctx)=>{
@@ -173,6 +174,11 @@ router.delete('/category/:id',async (ctx) =>{
             })
         })
     }
+    //判断该分类是否有上级分类
+    if(res.parent){
+        //从上级分类的childList中删除该分类
+        await Category.findOneAndUpdate({_id:res.parent},{$pull:{childList:{_id:res._id}}})
+    }
     ctx.body = {
         code: 0,
         message: '删除成功！！！',
@@ -182,6 +188,7 @@ router.delete('/category/:id',async (ctx) =>{
 
 //tag
 router.post('/tag',async(ctx)=>{
+    ctx.request.body.time = new Date()
     await Tag.create(ctx.request.body)
     ctx.body = {
         code: 0,
@@ -231,6 +238,7 @@ router.delete('/tag/:id',async(ctx)=>{
 
 //article
 router.post('/article',async(ctx)=>{
+    ctx.request.body.time = new Date()
     const markdown = require('markdown').markdown
     ctx.request.body.html = markdown.toHTML(ctx.request.body.content)
     // 保存文章
@@ -252,8 +260,12 @@ router.post('/article',async(ctx)=>{
     }
 })
 router.get('/article',async(ctx)=>{
-    let res = await Article.find().populate(['tag','category'])
-    ctx.body = res.reverse()
+    let res = await Article.find().sort({time:-1}).populate(['tag','category'])
+    ctx.body = res
+})
+router.get('/article/:id',async(ctx)=>{
+    const article = await Article.findById(ctx.params.id)
+    ctx.body = article
 })
 router.put('/article/:id',async(ctx)=>{
     const markdown = require('markdown').markdown
@@ -285,10 +297,6 @@ router.put('/article/:id',async(ctx)=>{
         message: '修改成功！！！'
     }
 })
-router.get('/article/:id',async(ctx)=>{
-    const article = await Article.findById(ctx.params.id)
-    ctx.body = article
-})
 router.delete('/article/:id',async(ctx)=>{
     //删除文章
     const res = await Article.findByIdAndDelete(ctx.params.id)
@@ -315,6 +323,7 @@ const upload = require('../../middleware/upload')
 router.post('/upload',upload.single('file'),async(ctx)=>{ 
     ctx.body = {
         url: `http://localhost:3000/uploads/${ctx.req.file.filename}`
+        //url: `https://www.server.cyxwbolg.com/uploads/${ctx.req.file.filename}`
     }
 })
 router.delete('/upload/:id',async(ctx)=>{

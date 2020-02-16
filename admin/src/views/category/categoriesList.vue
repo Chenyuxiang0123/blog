@@ -43,7 +43,7 @@
           let data = item.time
           item.time = FormatTime(data)
         })
-        this.list = list.data.reverse()
+        this.list = list.data
       },
       handleDelete(row) {
         this.$confirm(`是否删除分类 '${row.name}'`, '提示', {

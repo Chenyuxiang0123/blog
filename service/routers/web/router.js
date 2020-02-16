@@ -1,6 +1,6 @@
 const Router = require('koa-router')
 const router = new Router({
-    prefix: '/web/api'
+    prefix: '/api/web'
 })
 
 const Category = require('../../models/Category')
@@ -14,12 +14,10 @@ const getIp = require('../../middleware/getIp')
 
 //main
 router.get('/main',async(ctx)=>{
-  let ip = getIp()
-  let res = await User.findOne({ip})
   //获取没有parent的分类
-  const categories = await Category.find({parent:{$exists:false}})
+  const categories = await Category.find({parent:{$exists:false}}).sort({time:1}) || []
   //获取所有文章
-  const articlies = await Article.find().sort({time:-1}).populate(['tag','category'])
+  const articlies = await Article.find().sort({time:-1}).populate(['tag','category']) || []
   //最新文章
   const newArticlies = articlies.slice(0,6)
   //获取几个分类以及相关文章 tabs
@@ -32,19 +30,24 @@ router.get('/main',async(ctx)=>{
   async function getTabs(name){
     let tools = {}
     const category = await Category.findOne({name})
-    tools.name = category.name
-    const articlies = await Article.find({category:category._id}).sort({view:-1}).limit(8)
-    tools.left = articlies.slice(6,8)
-    tools.right = articlies.slice(0,6)
+    tools.name = name
+    if(category._id){
+      const articlies = await Article.find({category:category._id}).sort({view:-1}).limit(8)
+      tools.left = articlies.slice(6,8)
+      tools.right = articlies.slice(0,6)
+    }
     return tools
   }
   // cases
   const caseCategory = await Category.findOne({name:'实战案例'})
-  let cases = await Article.find({category:caseCategory._id}).limit(6)
+  let cases = []
+  if(caseCategory){
+    cases = await Article.find({category:caseCategory._id}).limit(6)
+  }
   //rank
-  const rank = await Article.find().sort({views:-1}).limit(8)
+  const rank = await Article.find().sort({views:-1}).limit(8) || []
   //hotComment
-  const hotComment = await Comment.find({verify:'已审核'}).sort({time:-1}).limit(11).populate('article')
+  const hotComment = await Comment.find({verify:'已审核'}).sort({time:-1}).limit(11).populate('article') || []
   
   //site
   let siteList = ['文章','分类','标签','留言','评论','访问人数']
@@ -80,7 +83,7 @@ router.get('/main',async(ctx)=>{
     return temp
   }
   //tags
-  let tags = await Tag.find()
+  let tags = await Tag.find() || []
   //创建用户
   let IPAdress = getIp()
   let user = await User.findOne({ip:IPAdress})

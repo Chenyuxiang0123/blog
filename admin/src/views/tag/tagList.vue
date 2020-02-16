@@ -41,10 +41,9 @@
           let data = item.time
           item.time = FormatTime(data)
         })
-        this.list = list.data
+        this.list = list.data.reverse()
       },
       handleDelete(row) {
-        console.log(row._id)
         this.$confirm(`是否删除标签 '${row.name}'`, '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',

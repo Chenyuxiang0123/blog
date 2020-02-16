@@ -4,7 +4,8 @@
       <h1><a href="/">我的博客</a></h1>
       <ul class="navList">
         <li v-for="(item) in list" :key='item._id'>
-          <a :href="`${item.router}/${item._id}`">{{ item.name  }}</a>
+          <a v-if="item.name === '首页'" :href="item.router">{{ item.name  }}</a>
+          <a v-if="item.name !== '首页'" :href="`${item.router}/${item._id}`">{{ item.name  }}</a>
           <i v-if="item.childList.length" class="el-icon-arrow-down"></i>
           <div class="navHide" v-if="item.childList.length">
               <a :href="`${value.router}/${value._id}`" v-for="value in item.childList"  :key='value._id'>{{ value.name }}</a>
@@ -25,7 +26,8 @@
           <el-drawer :direction='direction' :visible.sync="drawer" :with-header="false">
             <ul class="smallNavList">
               <li v-for="item in list" :key='item._id'>
-                <a :href="`${item.router}/${item._id}`">{{ item.name  }}</a>
+                <a v-if="item.name === '首页'" :href="item.router">{{ item.name  }}</a>
+                <a v-if="item.name !== '首页'" :href="`${item.router}/${item._id}`">{{ item.name  }}</a>
                 <i v-if="item.childList.length" class="el-icon-arrow-down"></i>
                 <div class="childList" v-if="item.childList.length">
                   <a :href="`${value.router}/${value._id}`" v-for="value in item.childList"  :key='value._id'>{{ value.name }}</a>
