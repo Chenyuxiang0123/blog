@@ -311,6 +311,20 @@ router.delete('/article/:id',async(ctx)=>{
     res.tag.map(async(item)=>{
         await Tag.findByIdAndUpdate(item,{$inc:{articlies:-1}})
     })
+    //删除所有评论
+    let comments = await Comment.find({article:res})
+    comments.map(async(comment)=>{
+        const _id = comment._id
+        await Comment.findByIdAndDelete({_id})
+    })
+    let views = await User.find({'view.article':res.title})
+    let likes = await User.find({'like.article':res.title})
+    views.map(async(view)=>{
+        await User.findByIdAndUpdate(view._id,{$pull:{view:{article:res.title}}})
+    })
+    likes.map(async(like)=>{
+        await User.findByIdAndUpdate(like._id,{$pull:{like:{article:res.title}}})
+    })
     ctx.body = {
         code: 0,
         type: 'success',
@@ -323,7 +337,7 @@ const upload = require('../../middleware/upload')
 router.post('/upload',upload.single('file'),async(ctx)=>{ 
     ctx.body = {
         url: `http://localhost:3000/uploads/${ctx.req.file.filename}`
-        //url: `https://www.server.cyxwbolg.com/uploads/${ctx.req.file.filename}`
+        //url: `https://www.server.cyxwblog.com/uploads/${ctx.req.file.filename}`
     }
 })
 router.delete('/upload/:id',async(ctx)=>{

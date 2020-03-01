@@ -2,7 +2,7 @@ const multer = require('koa-multer')
 //配置文件
 const storage = multer.diskStorage({
     //文件保存路径
-    destination(req,file,cb){cd 
+    destination(req,file,cb){
         cb(null, 'public/uploads/')
     },
     //修改文件名

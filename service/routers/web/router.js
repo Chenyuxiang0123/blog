@@ -31,7 +31,7 @@ router.get('/main',async(ctx)=>{
     let tools = {}
     const category = await Category.findOne({name})
     tools.name = name
-    if(category._id){
+    if(category){
       const articlies = await Article.find({category:category._id}).sort({view:-1}).limit(8)
       tools.left = articlies.slice(6,8)
       tools.right = articlies.slice(0,6)
@@ -85,10 +85,10 @@ router.get('/main',async(ctx)=>{
   //tags
   let tags = await Tag.find() || []
   //创建用户
-  let IPAdress = getIp()
+  let IPAdress = getIp(ctx)
   let user = await User.findOne({ip:IPAdress})
   if(!user){
-    await User.create({ip:IPAdress})
+    await User.create({ip:IPAdress,time:new Date()})
   }
   ctx.body = {
     categories,
@@ -144,7 +144,7 @@ router.get('/tabs/:id',async(ctx)=>{
 
 //message
 router.post('/message',async(ctx)=>{
-  let ip = getIp()
+  let ip = getIp(ctx)
   let _user = await User.find({ip})
   
   if(!_user.name){
@@ -184,7 +184,7 @@ router.get('/article',async(ctx)=>{
   ctx.body = articlies
 })
 router.get('/article/:id',async(ctx)=>{
-  let ip = getIp()
+  let ip = getIp(ctx)
   let article = await Article.findById(ctx.params.id)
   let likeUser = await User.findOne({ip,'like.article':article.title})
   let viewUser = await User.findOne({ip,'view.article':article.title})
@@ -230,7 +230,7 @@ router.get('/article/:id',async(ctx)=>{
 
 //comment
 router.post('/comment',async(ctx)=>{
-  let ip = getIp()
+  let ip = getIp(ctx)
   ctx.request.body.ip = ip
   let _user = await User.find({ip})
   if(!_user.name){
@@ -257,7 +257,7 @@ router.get('/comment/:id',async(ctx)=>{
 
 //praise
 router.post('/praise/:id',async(ctx)=>{
-  let ip = getIp()
+  let ip = getIp(ctx)
   let time = new Date()
   let article = await Article.findById(ctx.params.id)
   let user = await User.findOne({ip})
@@ -295,7 +295,7 @@ router.post('/praise/:id',async(ctx)=>{
 
 //views
 router.post('/views/:id',async(ctx)=>{
-  let ip = getIp()
+  let ip = getIp(ctx)
   let time = new Date()
   let article = await Article.findById(ctx.params.id)
   let user = await User.findOne({ip})
@@ -333,7 +333,6 @@ router.post('/views/:id',async(ctx)=>{
 router.post('/search',async(ctx)=>{
   let res = {}
   let value = ctx.request.body.value
-  console.log(ctx.request.body);
   
   let reg = value
   if(value === 'js'){
@@ -389,7 +388,7 @@ router.post('/search',async(ctx)=>{
 
 //user
 router.get('/user/:name',async (ctx)=>{
-  let ip = getIp()
+  let ip = getIp(ctx)
   let user = await User.findOne({name:ctx.params.name})
   if(user && ip !== user.ip){
     ctx.body = {
@@ -404,7 +403,7 @@ router.get('/user/:name',async (ctx)=>{
   }
 })
 router.get('/user',async (ctx)=>{
-  let ip = getIp()
+  let ip = getIp(ctx)
   let user = await User.findOne({ip})
   ctx.body = user
 })
